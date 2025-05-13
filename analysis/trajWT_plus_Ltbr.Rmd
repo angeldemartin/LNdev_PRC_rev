@@ -1,0 +1,234 @@
+---
+title: "trajWT_plus_Ltbr"
+author: "A.DeMartin"
+date: "2025-05-13"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+options(width = 100)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, dev = c("png", "pdf"))
+seed <- 1234
+```
+
+## load packages
+```{r load packages, warning=FALSE, include=FALSE}
+library(ExploreSCdataSeurat3)
+library(runSeurat3)
+library(Seurat)
+library(ggpubr)
+library(pheatmap)
+library(SingleCellExperiment)
+library(dplyr)
+library(tidyverse)
+library(viridis)
+library(muscat)
+library(circlize)
+library(destiny)
+library(scater)
+library(metap)
+library(multtest)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+library(msigdbr)
+library(enrichplot)
+library(DOSE)
+library(grid)
+library(gridExtra)
+library(ggupset)
+library(VennDiagram)
+library(NCmisc)
+library(slingshot)
+library(RColorBrewer)
+library(tradeSeq)
+library(magrittr)
+library(purrr)
+library(ggsci)
+```
+
+## load object
+```{r}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/WT_allTime_mLNonly_WtplusLtbr_EYFPonly_seurat.rds"
+seurat <- readRDS(fileNam)
+```
+
+```{r}
+colCond <- c("#446a7f", "#cb7457")
+names(colCond) <- c("LTbR", "WT")
+
+colAge <- c("#440154FF", "#3B528BFF", "#21908CFF", "#5DC863FF", "#FDE725FF")
+names(colAge) <- c("E18" , "P7", "3w", "8w","E17to7wk")
+
+colPal <- c("#DAF7A6", "#FFC300", "#FF5733", "#C70039", "#900C3F", "#b66e8d",
+            "#61a4ba", "#6178ba", "#54a87f",  "#25328a",
+            "#b6856e", "#0073C2FF", "#EFC000FF", "#868686FF", "#CD534CFF", 
+            "#7AA6DCFF", "#003C67FF", "#8F7700FF", "#3B3B3BFF", "#A73030FF",
+            "#4A6990FF")[1:length(unique(seurat$RNA_snn_res.0.4))]
+names(colPal) <- unique(seurat$RNA_snn_res.0.4)
+
+colDat <- colDat <- c(pal_npg()(10),pal_futurama()(12), pal_aaas()(10),
+                      pal_jama()(8))[1:length(unique(seurat$dataset))]
+names(colDat) <- unique(seurat$dataset)
+```
+
+## dimplot
+### clustering
+```{r}
+DimPlot(seurat, reduction = "umap", group.by = "RNA_snn_res.0.4",
+        cols = colPal)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+### age
+```{r}
+DimPlot(seurat, reduction = "umap", group.by = "age",
+        cols = colAge)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+```{r}
+DimPlot(seurat, reduction = "umap", group.by = "age", pt.size=0.5,
+        cols = colAge)+
+  theme_void()
+```
+
+### cond
+```{r}
+DimPlot(seurat, reduction = "umap", group.by = "cond",
+        cols = colCond, shuffle=T)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+```{r}
+DimPlot(seurat, reduction = "umap", group.by = "cond", pt.size=0.5,
+        cols = colCond, shuffle=T)+
+  theme_void()
+```
+
+## Slingshot WT only
+```{r}
+seuratSub <- subset(seurat, cond == "WT")
+seuratSub <- FindNeighbors(object = seuratSub, reduction = "pca", dims = 1:20)
+res <- c(0.8,0.6,0.25,0.4)
+for (i in 1:length(res)) {
+  seuratSub <- FindClusters(object = seuratSub, resolution = res[i],
+                         random.seed = 1234)
+  }
+```
+```{r}
+seuratSub$time <- 1
+seuratSub$time[which(seuratSub$age == "P7")] <- 2
+seuratSub$time[which(seuratSub$age == "3w")] <- 3
+seuratSub$time[which(seuratSub$age %in% c("8w", "E17to7wk"))] <- 4
+
+seuratSub$age2 <- seurat$age
+seuratSub$age2[which(seuratSub$age %in% c("8w", "E17to7wk"))] <- "8w"
+
+
+DimPlot(seuratSub, reduction = "umap", group.by = "RNA_snn_res.0.4",
+        cols = colPal)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+```{r}
+sceSub <- as.SingleCellExperiment(seuratSub)
+sceSub <- slingshot(sceSub, clusterLabels = 'RNA_snn_res.0.4', reducedDim = 'UMAP',
+                 start.clus = "6", times = sce$time, end.clus = c("0", "2", "3", "9", "10"),
+                 dist.method="simple", extend = 'n', stretch=0)
+
+clustDat <- data.frame(clustCol=colPal) %>% rownames_to_column(., "cluster")
+ageDat <- data.frame(ageCol=colAge) %>% rownames_to_column(., "age")
+colDat <- data.frame(cluster=sceSub$RNA_snn_res.0.4) %>%
+  mutate(age=sceSub$age2) %>% left_join(., clustDat, by="cluster") %>% 
+  left_join(., ageDat, by="age")
+
+plot(reducedDims(sceSub)$UMAP, col = colDat$clustCol, pch=16, asp = 1)
+lines(SlingshotDataSet(sceSub), lwd=2, type = 'lineages', col = 'black')
+```
+```{r}
+plot(reducedDims(sceSub)$UMAP, col = colDat$ageCol, pch=16, asp = 1)
+lines(SlingshotDataSet(sceSub), lwd=2, type = 'lineages', col = 'black')
+```
+```{r}
+plot(reducedDims(sceSub)$UMAP, col = colDat$clustCol, pch=16, asp = 1)
+lines(SlingshotDataSet(sceSub), lwd=2, col='black')
+```
+
+
+## Slingshot including Ltbr flox
+```{r}
+seurat$time <- 1
+seurat$time[which(seurat$age == "P7")] <- 2
+seurat$time[which(seurat$age == "3w")] <- 3
+seurat$time[which(seurat$age %in% c("8w", "E17to7wk"))] <- 4
+table(seurat$time)
+
+seurat$age2 <- seurat$age
+seurat$age2[which(seurat$age %in% c("8w", "E17to7wk"))] <- "8w"
+
+
+DimPlot(seurat, reduction = "umap", group.by = "RNA_snn_res.0.4",
+        cols = colPal)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+```{r}
+sce <- as.SingleCellExperiment(seurat)
+sce <- slingshot(sce, clusterLabels = 'RNA_snn_res.0.4', reducedDim = 'UMAP',
+                 start.clus = "7", 
+                 times = sce$time, 
+                 end.clus = c("0", "1", "4", "3", "9", "11"),
+                 dist.method="simple", extend = 'n', stretch=0)
+
+clustDat <- data.frame(clustCol=colPal) %>% rownames_to_column(., "cluster")
+ageDat <- data.frame(ageCol=colAge) %>% rownames_to_column(., "age")
+colDat <- data.frame(cluster=sce$RNA_snn_res.0.4) %>%
+  mutate(age=sce$age2) %>% left_join(., clustDat, by="cluster") %>% 
+  left_join(., ageDat, by="age")
+```
+
+```{r}
+plot(reducedDims(sce)$UMAP, col = colDat$clustCol, pch=16, asp = 1)
+lines(SlingshotDataSet(sce), lwd=2, type = 'lineages', col = 'black')
+```
+
+```{r}
+plot(reducedDims(sce)$UMAP, col = colDat$ageCol, pch=16, asp = 1)
+lines(SlingshotDataSet(sce), lwd=2, type = 'lineages', col = 'black')
+```
+
+```{r}
+plot(reducedDims(sce)$UMAP, col = colDat$clustCol, pch=16, asp = 1)
+lines(SlingshotDataSet(sce), lwd=2, col='black')
+```
+```{r}
+plot(reducedDims(sce)$UMAP, col = colDat$ageCol, pch=16, asp = 1)
+lines(SlingshotDataSet(sce), lwd=2, col='black')
+```
+
+## session info
+```{r date and session info}
+date()
+sessionInfo()
+```

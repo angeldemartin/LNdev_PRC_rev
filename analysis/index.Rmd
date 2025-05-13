@@ -1,5 +1,5 @@
 ---
-title: "Home"
+title: "FRC diff during LN development Rev"
 site: workflowr::wflow_site
 output:
   workflowr::wflow_html:
@@ -8,4 +8,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
+### Trajectory analysis mLN all timepoints incl Ltbr flox. 
+Trajectory
+[link](trajWT_plus_Ltbr.html)
