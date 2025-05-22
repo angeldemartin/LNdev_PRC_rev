@@ -1,0 +1,506 @@
+---
+title: "E18_mLN_iLN"
+author: "A.DeMartin"
+date: "2025-05-21"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+options(width = 100)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, dev = c("png", "pdf"))
+seed <- 1234
+```
+
+## load and preprocess
+### load packages
+```{r load packages, warning=FALSE, include=FALSE}
+library(ExploreSCdataSeurat3)
+library(runSeurat3)
+library(Seurat)
+library(ggpubr)
+library(pheatmap)
+library(SingleCellExperiment)
+library(dplyr)
+library(tidyverse)
+library(viridis)
+library(muscat)
+library(circlize)
+library(destiny)
+library(scater)
+library(metap)
+library(multtest)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+library(msigdbr)
+library(enrichplot)
+library(DOSE)
+library(grid)
+library(gridExtra)
+library(ggupset)
+library(VennDiagram)
+library(NCmisc)
+```
+
+### set color vectors 
+```{r set color vector}
+coltimepoint <- c("#440154FF", "#3B528BFF", "#21908CFF", "#5DC863FF")
+names(coltimepoint) <- c("E18", "P7", "3w", "8w")
+
+collocation <- c("#61baba", "#ba6161")
+names(collocation) <- c("iLN", "mLN")
+```
+
+### load object
+```{r load merged object all, eval=FALSE, include=FALSE}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/AllSamplesMerged_seurat.rds"
+seuratM <- readRDS(fileNam)
+table(seuratM$age)
+```
+
+### subset E18
+```{r subset E18 datasets, eval=FALSE, include=FALSE}
+seuratA <- subset(seuratM, age == "E18")
+table(seuratA$age)
+
+#rerun seurat
+seuratA <- NormalizeData (object = seuratA)
+seuratA <- FindVariableFeatures(object = seuratA)
+seuratA <- ScaleData(object = seuratA, verbose = TRUE)
+seuratA <- RunPCA(object=seuratA, npcs = 30, verbose = FALSE)
+seuratA <- RunTSNE(object=seuratA, reduction="pca", dims = 1:20)
+seuratA <- RunUMAP(object=seuratA, reduction="pca", dims = 1:20)
+seuratA <- FindNeighbors(object = seuratA, reduction = "pca", dims= 1:20)
+
+res <- c(0.25, 0.6, 0.8, 0.4)
+for (i in 1:length(res)) {
+  seuratA <- FindClusters(object = seuratA, resolution = res[i], random.seed = 1234)
+}
+```
+
+### plot umaps
+#### clustering
+```{r umap clustering pre filter,eval=FALSE, include=FALSE}
+Idents(seuratA) <- seuratA$RNA_snn_res.0.25
+DimPlot(seuratA, reduction = "umap", group.by = "RNA_snn_res.0.25" ,
+        pt.size = 0.1, label = T, shuffle = T) +
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("umap1") +
+  ylab("umap2")
+```
+
+#### location
+```{r umap location pre filter,eval=FALSE, include=FALSE}
+DimPlot(seuratA, reduction = "umap", group.by = "location" ,
+        pt.size = 0.1, label = T, shuffle = T) +
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("umap1") +
+  ylab("umap2")
+```
+
+### calculate cluster marker genes pre filter
+```{r cluster marker genes pre filter, eval=FALSE, include=FALSE}
+## calculate marker genes
+Idents(seuratA) <- seuratA$RNA_snn_res.0.25
+levels(seuratA)
+
+markerGenes <- FindAllMarkers(seuratA, only.pos=T) %>% 
+  dplyr::filter(p_val_adj < 0.01) 
+```
+
+```{r featureplot sel genes pre filter,eval=FALSE, include=FALSE}
+genes <- data.frame(gene=rownames(seuratA)) %>% 
+    mutate(geneID=gsub("^.*\\.", "", gene)) 
+
+selGenes <- data.frame(geneID=c("Ptprc", "Msln", "Mki67", "Kcnn3", "Tcf21", "Pecam1", "Lyve1", "Ccl21a", "Icam1", "Cd34", "Mrc1", "Rosa26eyfp", "Krt19", "Acta2","Myh11", "Cxcl13", "Epcam", "Adipoq")) %>% 
+  left_join(., genes, by = "geneID") 
+
+pList <- sapply(selGenes$gene, function(x){
+  p <- FeaturePlot(seuratA, reduction = "umap", 
+            features = x, 
+            cols=c("lightgrey","darkred"),
+            order = T)+
+  theme(legend.position="right")
+  plot(p)
+})
+```
+
+## filter 
+### filter object
+```{r filter object, eval=FALSE, include=TRUE}
+## filter out and Pecam pos (cluster 15)
+## filter immune cells (cluseter 14)
+
+table(seuratA$RNA_snn_res.0.25)
+seuratF <- subset(seuratA, RNA_snn_res.0.25 %in% c("15", "14"), invert = TRUE)
+table(seuratF$RNA_snn_res.0.25)
+
+seuratE18fil <- seuratF
+remove(seuratF)
+```
+
+### rerun after fil
+```{r rerun after fil, eval=FALSE, include=FALSE}
+#rerun seurat
+seuratE18fil <- NormalizeData (object = seuratE18fil)
+seuratE18fil <- FindVariableFeatures(object = seuratE18fil)
+seuratE18fil <- ScaleData(object = seuratE18fil, verbose = TRUE)
+seuratE18fil <- RunPCA(object=seuratE18fil, npcs = 30, verbose = FALSE)
+seuratE18fil <- RunTSNE(object=seuratE18fil, reduction="pca", dims = 1:20)
+seuratE18fil <- RunUMAP(object=seuratE18fil, reduction="pca", dims = 1:20)
+seuratE18fil <- FindNeighbors(object = seuratE18fil, reduction = "pca", dims= 1:20)
+
+res <- c(0.25, 0.6, 0.8, 0.4)
+for (i in 1:length(res)) {
+  seuratE18fil <- FindClusters(object = seuratE18fil, resolution = res[i], random.seed = 1234)
+}
+```
+
+### load object fil
+```{r load object E18fil}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18fil_seurat.rds"
+seuratE18fil <- readRDS(fileNam)
+```
+
+## dimplot
+### clustering
+```{r dimplot clustering E18fil}
+Idents(seuratE18fil) <- seuratE18fil$RNA_snn_res.0.25
+colPal <- c("#DAF7A6", "#FFC300", "#FF5733", "#C70039", "#900C3F", "#b66e8d",
+            "#61a4ba", "#6178ba", "#54a87f",  "#25328a",
+            "#b6856e", "#0073C2FF", "#EFC000FF", "#868686FF", "#CD534CFF", 
+            "#7AA6DCFF", "#003C67FF", "#8F7700FF", "#3B3B3BFF", "#A73030FF",
+            "#4A6990FF")[1:length(unique(seuratE18fil$RNA_snn_res.0.25))]
+names(colPal) <- unique(seuratE18fil$RNA_snn_res.0.25)
+
+DimPlot(seuratE18fil, reduction = "umap", group.by = "RNA_snn_res.0.25",
+        cols = colPal, label = TRUE)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+### location
+```{r dimplot loction E18fil}
+DimPlot(seuratE18fil, reduction = "umap", group.by = "location",
+        cols = collocation)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+
+### save object fil
+```{r, eval=FALSE, eval=FALSE, include=TRUE}
+saveRDS(seuratE18fil, file="/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18fil_seurat.rds")
+```
+
+## integrate data across location
+```{r integrate, eval=FALSE, include=TRUE}
+Idents(seuratE18fil) <- seuratE18fil$location
+
+seurat.list <- SplitObject(object = seuratE18fil, split.by = "location")
+for (i in 1:length(x = seurat.list)) {
+    seurat.list[[i]] <- NormalizeData(object = seurat.list[[i]],
+                                      verbose = FALSE)
+    seurat.list[[i]] <- FindVariableFeatures(object = seurat.list[[i]], 
+        selection.method = "vst", nfeatures = 2000, verbose = FALSE)
+}
+
+seurat.anchors <- FindIntegrationAnchors(object.list = seurat.list, dims = 1:20)
+seuratE18fil.int <- IntegrateData(anchorset = seurat.anchors, dims = 1:20)
+DefaultAssay(object = seuratE18fil.int) <- "integrated"
+
+## rerun seurat
+seuratE18fil.int <- ScaleData(object = seuratE18fil.int, verbose = FALSE,
+                         features = rownames(seuratE18fil.int))
+seuratE18fil.int <- RunPCA(object = seuratE18fil.int, npcs = 20, verbose = FALSE)
+seuratE18fil.int <- RunTSNE(object = seuratE18fil.int, recuction = "pca", dims = 1:20)
+seuratE18fil.int <- RunUMAP(object = seuratE18fil.int, recuction = "pca", dims = 1:20)
+
+seuratE18fil.int <- FindNeighbors(object = seuratE18fil.int, reduction = "pca", dims = 1:20)
+res <- c(0.6, 0.8, 0.4, 0.25)
+for (i in 1:length(res)){
+  seuratE18fil.int <- FindClusters(object = seuratE18fil.int, resolution = res[i],
+                              random.seed = 1234)
+}
+```
+
+### save object fil int
+```{r, eval=FALSE, eval=FALSE, include=TRUE}
+saveRDS(seuratE18fil.int, file="/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18fil_integrated_seurat.rds")
+```
+
+### load object fil int
+```{r load object E18fil int}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18fil_integrated_seurat.rds"
+seuratE18fil.int <- readRDS(fileNam)
+```
+
+
+```{r set default assay int object}
+DefaultAssay(object = seuratE18fil.int) <- "RNA"
+seuratE18fil.int$intCluster <- seuratE18fil.int$integrated_snn_res.0.4
+Idents(seuratE18fil.int) <- seuratE18fil.int$intCluster
+
+colPal <- c("#DAF7A6", "#FFC300", "#FF5733", "#C70039", "#900C3F", "#b66e8d",
+            "#61a4ba", "#6178ba", "#54a87f", "#25328a", "#b6856e",
+            "#ba6161", "#20714a", "#0073C2FF", "#EFC000FF", "#868686FF", 
+            "#CD534CFF","#7AA6DCFF", "#003C67FF", "#8F7700FF", "#3B3B3BFF",
+            "#A73030FF", "#4A6990FF")[1:length(unique(seuratE18fil.int$intCluster))]
+names(colPal) <- unique(seuratE18fil.int$intCluster)
+```
+
+## Dimplot int data
+### clustering 
+```{r umap int clustering 0.4}
+DimPlot(seuratE18fil.int, reduction = "umap",
+        pt.size = 0.1, label = T, shuffle = T, cols = colPal) +
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("umap1") +
+  ylab("umap2")
+```
+
+### location
+```{r umap int location}
+DimPlot(seuratE18fil.int, reduction = "umap", group.by = "location", cols = collocation,
+        pt.size = 0.1, shuffle = T) +
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("umap1") +
+  ylab("umap2")
+```
+
+### assign label
+```{r assign label int clusters}
+seuratE18fil.int$label <- "label"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "0")] <- "Fb1"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "1")] <- "Fb2"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "2")] <- "Adipocytes1"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "3")] <- "Fb3"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "4")] <- "Prolif1"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "5")] <- "Fb4"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "6")] <- "Prolif2"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "7")] <- "Adipocytes2"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "8")] <- "Fb5"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "9")] <- "Fb6"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "10")] <- "LN-VSMC"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "11")] <- "Mesothelial"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "12")] <- "Fb7"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "13")] <- "Neuronal1"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "14")] <- "VSMC"
+seuratE18fil.int$label[which(seuratE18fil.int$intCluster == "15")] <- "Neuronal2"
+
+
+table(seuratE18fil.int$label)
+##order
+seuratE18fil.int$label <- factor(seuratE18fil.int$label, levels = c("Fb1","Fb2","Fb3", "Fb4", "Fb5", "Fb6", "Fb7","LN-VSMC", "VSMC", "Neuronal1", "Neuronal2", "Adipocytes1", "Adipocytes2", "Mesothelial", "Prolif1", "Prolif2"))
+table(seuratE18fil.int$label)
+
+colLab <- c("#42a071", "#900C3F","#b66e8d", "#61a4ba", "#424671", "#003C67FF",
+            "#e3953d", "#714542", "#b6856e", "#FFC300", "#8F7700FF", "#3B3B3BFF",
+            "#A73030FF", "#4A6990FF","#CD534CFF","#7AA6DCFF","#DAF7A6")
+
+names(colLab) <- c(unique(seuratE18fil.int$label))
+```
+
+### label
+```{r umap int label}
+DimPlot(seuratE18fil.int, reduction = "umap", group.by = "label", cols = colLab)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+
+DimPlot(seuratE18fil.int, reduction = "umap", group.by = "label", pt.size=0.5,
+        cols = colLab, shuffle = T)+
+  theme_void()
+
+DimPlot(seuratE18fil.int, reduction = "umap", group.by = "label", pt.size=0.5,
+        cols = colLab, shuffle = T)+
+  theme_void() + 
+  theme(legend.position = "none") 
+```
+
+### calculate cluster marker genes int
+```{r cluster marker genes int}
+## calculate marker genes
+Idents(seuratE18fil.int) <- seuratE18fil.int$intCluster
+levels(seuratE18fil.int)
+
+markerGenes_int <- FindAllMarkers(seuratE18fil.int, only.pos=T) %>% 
+  dplyr::filter(p_val_adj < 0.01) 
+```
+
+```{r, include=TRUE, eval=FALSE}
+#save table
+write.table(markerGenes_int, 
+            file= "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/markerGenes_E18fil_integrated_intCluster",
+            sep="\t",
+            quote=F,
+            row.names=F,
+            col.names=T)
+```
+
+
+```{r featureplot sel genes fil int}
+genes <- data.frame(gene=rownames(seuratE18fil.int)) %>% 
+    mutate(geneID=gsub("^.*\\.", "", gene)) 
+
+selGenes <- data.frame(geneID=c("Ptprc", "Msln", "Mki67", "Kcnn3", "Tcf21", "Pecam1", "Lyve1", "Ccl21a", "Icam1", "Cd34", "Rosa26eyfp", "Krt19", "Acta2","Myh11", "Cxcl13", "Epcam", "Adipoq")) %>% 
+  left_join(., genes, by = "geneID") 
+
+pList <- sapply(selGenes$gene, function(x){
+  p <- FeaturePlot(seuratE18fil.int, reduction = "umap", 
+            features = x, 
+            cols=c("lightgrey","darkred"),
+            order = T)+
+  theme(legend.position="right")
+  plot(p)
+})
+
+```
+
+## cluster characterization
+### heatmap funcion
+```{r heatmap funcion}
+avgHeatmap <- function(seurat, selGenes, colVecIdent, colVecCond=NULL,
+                       ordVec=NULL, gapVecR=NULL, gapVecC=NULL,cc=FALSE,
+                       cr=FALSE, condCol=FALSE){
+  
+  selGenes <- selGenes$gene
+  
+  ## assay data
+  clusterAssigned <- as.data.frame(Idents(seurat)) %>%
+  dplyr::mutate(cell=rownames(.))
+  colnames(clusterAssigned)[1] <- "ident"
+  seuratDat <- GetAssayData(seurat)
+  
+  ## genes of interest
+  genes <- data.frame(gene=rownames(seurat)) %>% 
+    mutate(geneID=gsub("^.*\\.", "", gene)) %>% filter(geneID %in% selGenes)
+
+  ## matrix with averaged cnts per ident
+  logNormExpres <- as.data.frame(t(as.matrix(
+    seuratDat[which(rownames(seuratDat) %in% genes$gene),])))
+  logNormExpres <- logNormExpres %>% dplyr::mutate(cell=rownames(.)) %>%
+    dplyr::left_join(.,clusterAssigned, by=c("cell")) %>%
+    dplyr::select(-cell) %>% dplyr::group_by(ident) %>%
+    dplyr::summarise_all(mean)
+  logNormExpresMa <- logNormExpres %>% dplyr::select(-ident) %>% as.matrix()
+  rownames(logNormExpresMa) <- logNormExpres$ident
+  logNormExpresMa <- t(logNormExpresMa)
+  rownames(logNormExpresMa) <- gsub("^.*?\\.","",rownames(logNormExpresMa))
+  
+  ## remove genes if they are all the same in all groups
+  ind <- apply(logNormExpresMa, 1, sd) == 0
+  logNormExpresMa <- logNormExpresMa[!ind,]
+  genes <- genes[!ind,]
+
+  ## color columns according to cluster
+  annotation_col <- as.data.frame(gsub("(^.*?_)","",
+                                       colnames(logNormExpresMa)))%>%
+    dplyr::mutate(celltype=gsub("(_.*$)","",colnames(logNormExpresMa)))
+  colnames(annotation_col)[1] <- "col1"
+  annotation_col <- annotation_col %>%
+    dplyr::mutate(cond = gsub(".*_","",col1)) %>%
+    dplyr::select(cond, celltype)
+  rownames(annotation_col) <- colnames(logNormExpresMa) 
+
+  ann_colors = list(
+      cond = colVecCond,
+      celltype=colVecIdent)
+  if(is.null(ann_colors$cond)){
+    annotation_col$cond <- NULL
+  }
+  
+  ## adjust order
+  logNormExpresMa <- logNormExpresMa[selGenes,]
+  if(is.null(ordVec)){
+    ordVec <- levels(seurat)
+  }
+  logNormExpresMa <- logNormExpresMa[,ordVec]
+
+  ## scaled row-wise
+  pheatmap(logNormExpresMa, scale="row" ,treeheight_row = 0, cluster_rows = cr, 
+         cluster_cols = cc,
+         color = colorRampPalette(c("#2166AC", "#F7F7F7", "#B2182B"))(50),
+         annotation_col = annotation_col, cellwidth=15, cellheight=10,
+         annotation_colors = ann_colors, gaps_row = gapVecR, gaps_col = gapVecC)
+}
+```
+
+### heatmap
+```{r characterize clusters heatmap, fig.height=28, fig.width=8}
+### plot DE genes top 10 avg logFC
+markerAll <- markerGenes_int %>% group_by(cluster) %>% 
+  mutate(geneID = gene) %>% top_n(10, -p_val_adj) %>%
+  top_n(10, avg_log2FC) %>%
+  mutate(gene=gsub(".*\\.", "",  geneID)) %>% 
+  filter(nchar(gene)>1)
+
+grpCnt <- markerAll %>% group_by(cluster) %>% summarise(cnt=n())
+gapR <- data.frame(cluster=unique(markerAll$cluster)) %>% 
+  left_join(.,grpCnt, by="cluster") %>% mutate(cumSum=cumsum(cnt)) 
+ordVec <- levels(seuratE18fil.int)
+
+pOut <- avgHeatmap(seurat = seuratE18fil.int, selGenes = markerAll,
+                  colVecIdent = colPal, 
+                  ordVec=ordVec,
+                  gapVecR=gapR$cumSum, gapVecC=NULL,cc=T,
+                  cr=F, condCol=F)
+```
+
+### dotplot FRC marker
+```{r dotplot FRC marker, fig.height=8, fig.width=6}
+seurat_markers <- data.frame(gene=c("Fcgr2b","Fcer2a","Cr2","Cxcl13",
+                                    "Slc7a11", "Ccl19", 
+                                    "Ccl21a", "Fmod", "Grem1", "Bmp4",
+                                    "Tnfsf11", "Fbn2",
+                                    "Pltp" ,"C1rb", "Lepr", "Ptn",
+                                     "Nr4a1", "Cxcl10", "Cxcl9", 
+                                    "F3", "Fbln1", "Gdf10", "Adamtsl1", 
+                                    "Col15a1",  "Cd34",
+                                    "Igfbp6", "Pi16", "Thy1", "Dpp4", "Sema3c", 
+                                    "Acta2", "Myh11", "Mcam", "Itga7", "Esam", "Rgs4"
+                                    ))
+
+genes <- data.frame(geneID=rownames(seuratE18fil.int)) %>%
+  mutate(gene=gsub(".*\\.", "",  geneID)) 
+
+markerAll <- seurat_markers %>% left_join(., genes, by="gene")
+
+
+## Dotplot all
+Idents(seuratE18fil.int) <- seuratE18fil.int$label
+
+DotPlot(seuratE18fil.int, assay="RNA", features = rev(markerAll$geneID), scale =T,
+        cluster.idents = F) +
+  scale_color_viridis_c() +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_x_discrete(breaks=rev(markerAll$geneID), labels=rev(markerAll$gene)) +
+  xlab("") + ylab("")
+```
+
+## session info
+```{r date and session info}
+date()
+sessionInfo()
+```
