@@ -1,0 +1,303 @@
+---
+title: "iLNEYFPpos"
+author: "A.DeMartin"
+date: "2025-05-23"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+options(width = 100)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, dev = c("png", "pdf"))
+seed <- 1234
+```
+
+## load and preprocess
+### load packages
+```{r load packages, warning=FALSE, include=FALSE}
+library(ExploreSCdataSeurat3)
+library(runSeurat3)
+library(Seurat)
+library(ggpubr)
+library(pheatmap)
+library(SingleCellExperiment)
+library(dplyr)
+library(tidyverse)
+library(viridis)
+library(muscat)
+library(circlize)
+library(destiny)
+library(scater)
+library(metap)
+library(multtest)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+library(msigdbr)
+library(enrichplot)
+library(DOSE)
+library(grid)
+library(gridExtra)
+library(ggupset)
+library(VennDiagram)
+library(NCmisc)
+```
+
+### set color vectors 
+```{r set color vector}
+colAge <- c("#440154FF", "#3B528BFF", "#21908CFF", "#5DC863FF", "#FDE725FF")
+names(colAge) <- c("E18" , "P7", "3w", "8w","E17to7wk")
+
+collocation <- c("#61baba", "#ba6161")
+names(collocation) <- c("iLN", "mLN")
+```
+
+### load object
+```{r load merged object all}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/AllSamplesMerged_seurat.rds"
+seuratM <- readRDS(fileNam)
+table(seuratM$EYFP, seuratM$age)
+table(seuratM$location)
+
+seurat <- subset(seuratM, location=="iLN")
+table(seurat$EYFP, seurat$age)
+table(seurat$cond, seurat$location)
+
+seurat <- subset(seurat, EYFP=="pos")
+table(seurat$EYFP, seurat$age)
+
+seurat <- subset(seurat, cond=="WT")
+table(seurat$EYFP, seurat$age)
+```
+
+```{r, include=TRUE, eval=FALSE}
+## rerunSeurat
+seurat <- NormalizeData(object = seurat)
+seurat <- FindVariableFeatures(object = seurat)
+seurat <- ScaleData(object = seurat, verbose = FALSE)
+seurat <- RunPCA(object = seurat, npcs = 30, verbose = FALSE)
+seurat <- RunTSNE(object = seurat, reduction = "pca", dims = 1:20)
+seurat <- RunUMAP(object = seurat, reduction = "pca", dims = 1:20)
+seurat <- FindNeighbors(object = seurat, reduction = "pca", dims = 1:20)
+res <- c(0.8,0.6,0.25,0.4)
+for (i in 1:length(res)) {
+seurat <- FindClusters(object = seurat, resolution = res[i],
+                          random.seed = 1234)
+   }
+```
+
+```{r, eval=FALSE, include=TRUE}
+saveRDS(seurat, file="/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/WT_allTime_iLNonly_EYFPonly_seurat.rds")
+```
+
+```{r load object EYFP WT iLN}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/WT_allTime_iLNonly_EYFPonly_seurat.rds"
+seurat <- readRDS(fileNam)
+```
+
+## dimplot 
+### clustering
+```{r dimplot clustering pre fil}
+colPal <- c("#DAF7A6", "#FFC300", "#FF5733", "#C70039", "#900C3F", "#b66e8d",
+            "#61a4ba", "#6178ba", "#54a87f",  "#25328a",
+            "#b6856e", "#0073C2FF", "#EFC000FF", "#868686FF", "#CD534CFF", 
+            "#7AA6DCFF", "#003C67FF", "#8F7700FF", "#3B3B3BFF", "#A73030FF",
+            "#4A6990FF")[1:length(unique(seurat$RNA_snn_res.0.4))]
+names(colPal) <- unique(seurat$RNA_snn_res.0.4)
+
+DimPlot(seurat, reduction = "umap", group.by = "RNA_snn_res.0.4",
+        cols = colPal)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+### age
+```{r dimplot age pre fil}
+DimPlot(seurat, reduction = "umap", group.by = "age",
+        cols = colAge)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+### calculate cluster marker genes
+```{r marker RNA_snn_res.0.4, include=TRUE, eval=FALSE}
+##cluster marker
+Idents(seurat) <- seurat$RNA_snn_res.0.4
+markerGenes <- FindAllMarkers(seurat, only.pos=T) %>% 
+  dplyr::filter(p_val_adj < 0.01)
+```
+
+```{r, include=FALSE, eval=FALSE}
+#save table
+write.table(markerGenes, 
+            file= "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/markerGenes_iLNEYFP_RNA_snn_res.0.4",
+            sep="\t",
+            quote=F,
+            row.names=F,
+            col.names=T)
+```
+
+```{r featureplot sel genes pre filter}
+selGenesViolin <- c("ENSMUSG00000031004.Mki67", "ENSMUSG00000022878.Adipoq")
+
+pList <- sapply(selGenesViolin, function(x){
+  p <- FeaturePlot(seurat, reduction = "umap", 
+            features = x, 
+            cols=c("lightgrey", "darkred"),
+            order = T)+
+  theme(legend.position="right")
+  plot(p)
+})
+```
+
+```{r}
+table(seurat$age)
+table(seurat$RNA_snn_res.0.4)
+```
+
+## filter 
+### filter object 3
+```{r filter object 3, eval=FALSE, include=TRUE}
+## filter out Adipocytes (cluster #8),
+## and proliferating cells (cluster #4)
+seuratF <- subset(seurat, RNA_snn_res.0.4 %in% c("4", "8"), invert = TRUE)
+
+seurat <- seuratF
+remove(seuratF)
+```
+
+```{r}
+table(seurat$age)
+table(seurat$RNA_snn_res.0.4)
+```
+
+### rerun after filter 3
+```{r rerun after filter, eval=FALSE, include=TRUE}
+#rerun seurat
+seurat <- NormalizeData(object = seurat)
+seurat <- FindVariableFeatures(object = seurat)
+seurat <- ScaleData(object = seurat, verbose = FALSE)
+seurat <- RunPCA(object = seurat, npcs = 30, verbose = FALSE)
+seurat <- RunTSNE(object = seurat, reduction = "pca", dims = 1:20)
+seurat <- RunUMAP(object = seurat, reduction = "pca", dims = 1:20)
+seurat <- FindNeighbors(object = seurat, reduction = "pca", dims = 1:20)
+res <- c(0.8,0.6,0.25,0.4)
+for (i in 1:length(res)) {
+seurat <- FindClusters(object = seurat, resolution = res[i],
+                          random.seed = 1234)
+   }
+```
+
+```{r, eval=FALSE, eval=FALSE, include=TRUE}
+saveRDS(seurat, file="/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/WT_allTime_iLNonly_EYFPonly_fil_seurat.rds")
+```
+
+```{r load object fil}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/WT_allTime_iLNonly_EYFPonly_fil_seurat.rds"
+seurat <- readRDS(fileNam)
+```
+
+## dimplot 
+### clustering
+```{r dimplot clustring fil}
+DimPlot(seurat, reduction = "umap", group.by = "RNA_snn_res.0.4",
+        cols = colPal)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+### age
+```{r dimplot age fil}
+DimPlot(seurat, reduction = "umap", group.by = "age",
+        cols = colAge)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+## plot features
+```{r features fil}
+genes <- data.frame(gene=rownames(seurat)) %>% 
+    mutate(geneID=gsub("^.*\\.", "", gene)) 
+
+selGenesAll <- data.frame(geneID=c("Rosa26eyfp","tdTomato", "Ccl19", "Ccl21a", "Cxcl13",
+                                   "Fbln1", "Col15a1", "Cnn1", "Acta2","Myh11", "Rgs5",
+                                   "Cox4i2", "Pi16", "Cd34", "Emp1", "Ogn","Des",
+                                   "Fhl2")) %>% 
+  left_join(., genes, by = "geneID") 
+
+pList <- sapply(selGenesAll$gene, function(x){
+p <- FeaturePlot(seurat, reduction = "umap", 
+            features = x,
+            cols=c("lightgrey", "darkred"),
+            order = F) +
+  theme(legend.position="right")
+  plot(p)
+})
+```
+
+### label transfer
+```{r transfer label}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/WT_adultOnly_bothLabeled_integrated__seurat.rds"
+seuratLab <- readRDS(fileNam)
+
+seuratLab <- subset(seuratLab, location=="iLN")
+seuratLab <- subset(seuratLab, EYFP=="pos")
+table(seuratLab$label)
+```
+
+
+```{r transfer label-2}
+labCells <- data.frame(label=seuratLab$label) %>% rownames_to_column(., "cell")
+allCell <- data.frame(cell=colnames(seurat)) %>% 
+  left_join(., labCells, by= "cell")
+allCell$label[which(is.na(allCell$label))] <- "unassigned"
+seurat$label <- allCell$label
+
+table(seurat$age)
+table(seurat$label)
+
+colLab <- c("#42a071", "#900C3F","#b66e8d", "#61a4ba", "#424671", "#003C67FF",
+            "#e3953d", "#714542", "#b6856e", "#a4a4a4")
+
+names(colLab) <- c("FDC/MRC", "TRC", "TBRC", "MedRC/IFRC", "MedRC" , "actMedRC",
+                   "PRC", "Pi16+RC", "VSMC", "unassigned")
+
+DimPlot(seurat, reduction = "umap", group.by = "label",
+        cols = colLab, shuffle=T)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+```{r transfer label-3}
+DimPlot(seurat, reduction = "umap", group.by = "label", pt.size=0.5,
+        cols = colLab, order = TRUE)+
+  theme_void()
+
+DimPlot(seurat, reduction = "umap", group.by = "label", pt.size=0.5,
+        cols = colLab, shuffle = FALSE)+
+  theme_void()
+```
+
+## session info
+```{r date and session info}
+date()
+sessionInfo()
+```
