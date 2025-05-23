@@ -1,0 +1,623 @@
+---
+title: "E18_mLN_iLN_EYFPonly"
+author: "A.DeMartin"
+date: "2025-05-22"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+options(width = 100)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, dev = c("png", "pdf"))
+seed <- 1234
+```
+
+## load and preprocess
+### load packages
+```{r load packages, warning=FALSE, include=FALSE}
+library(ExploreSCdataSeurat3)
+library(runSeurat3)
+library(Seurat)
+library(ggpubr)
+library(pheatmap)
+library(SingleCellExperiment)
+library(dplyr)
+library(tidyverse)
+library(viridis)
+library(muscat)
+library(circlize)
+library(destiny)
+library(scater)
+library(metap)
+library(multtest)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+library(msigdbr)
+library(enrichplot)
+library(DOSE)
+library(grid)
+library(gridExtra)
+library(ggupset)
+library(VennDiagram)
+library(NCmisc)
+```
+
+### set color vectors 
+```{r set color vector}
+coltimepoint <- c("#440154FF", "#3B528BFF", "#21908CFF", "#5DC863FF")
+names(coltimepoint) <- c("E18", "P7", "3w", "8w")
+
+collocation <- c("#61baba", "#ba6161")
+names(collocation) <- c("iLN", "mLN")
+```
+
+### load object fil
+```{r load object E18fil}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18fil_seurat.rds"
+seuratE18fil <- readRDS(fileNam)
+```
+
+## dimplot E18fil
+### clustering
+```{r dimplot clustering E18fil}
+Idents(seuratE18fil) <- seuratE18fil$RNA_snn_res.0.25
+colPal <- c("#DAF7A6", "#FFC300", "#FF5733", "#C70039", "#900C3F", "#b66e8d",
+            "#61a4ba", "#6178ba", "#54a87f",  "#25328a",
+            "#b6856e", "#0073C2FF", "#EFC000FF", "#868686FF", "#CD534CFF", 
+            "#7AA6DCFF", "#003C67FF", "#8F7700FF", "#3B3B3BFF", "#A73030FF",
+            "#4A6990FF")[1:length(unique(seuratE18fil$RNA_snn_res.0.25))]
+names(colPal) <- unique(seuratE18fil$RNA_snn_res.0.25)
+
+DimPlot(seuratE18fil, reduction = "umap", group.by = "RNA_snn_res.0.25",
+        cols = colPal, label = TRUE)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+```{r featureplot eyfp}
+genes <- data.frame(gene=rownames(seuratE18fil)) %>% 
+    mutate(geneID=gsub("^.*\\.", "", gene)) 
+
+selGenes <- data.frame(geneID=c("Rosa26eyfp", "Mki67")) %>% 
+  left_join(., genes, by = "geneID") 
+
+pList <- sapply(selGenes$gene, function(x){
+  p <- FeaturePlot(seuratE18fil, reduction = "umap", 
+            features = x, 
+            cols=c("lightgrey","darkred"),
+            order = T)+
+  theme(legend.position="right")
+  plot(p)
+})
+```
+
+## subset version 1 - EYFP positive clusters
+### subset EYFP positive clusters
+```{r subset EYFP pos cluster, eval=FALSE, include=FALSE}
+table(seuratE18fil$RNA_snn_res.0.25)
+seuratE18EYFP <- subset(seuratE18fil, RNA_snn_res.0.25 %in% c("5", "9"))
+table(seuratE18EYFP$RNA_snn_res.0.25)
+
+DimPlot(seuratE18EYFP, reduction = "umap", group.by = "RNA_snn_res.0.25",
+        cols = colPal, label = TRUE)
+
+#rerun seurat
+seuratE18EYFP <- NormalizeData (object = seuratE18EYFP)
+seuratE18EYFP <- FindVariableFeatures(object = seuratE18EYFP)
+seuratE18EYFP <- ScaleData(object = seuratE18EYFP, verbose = TRUE)
+seuratE18EYFP <- RunPCA(object=seuratE18EYFP, npcs = 30, verbose = FALSE)
+seuratE18EYFP <- RunTSNE(object=seuratE18EYFP, reduction="pca", dims = 1:20)
+seuratE18EYFP <- RunUMAP(object=seuratE18EYFP, reduction="pca", dims = 1:20)
+seuratE18EYFP <- FindNeighbors(object = seuratE18EYFP, reduction = "pca", dims= 1:20)
+
+res <- c(0.25, 0.6, 0.8, 0.4)
+for (i in 1:length(res)) {
+  seuratE18EYFP <- FindClusters(object = seuratE18EYFP, resolution = res[i], random.seed = 1234)
+}
+```
+
+### save object EYFP 
+```{r, eval=FALSE, eval=FALSE, include=TRUE}
+saveRDS(seuratE18EYFP, file="/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18_EYFP_seurat.rds")
+```
+
+### load object EYFP
+```{r}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18_EYFP_seurat.rds"
+seuratE18EYFP <- readRDS(fileNam)
+```
+
+## dimplot E18 EYFP clusters
+### clustering
+```{r dimplot clustering E18 EYFP pos}
+Idents(seuratE18EYFP) <- seuratE18EYFP$RNA_snn_res.0.25
+colPal <- c("#DAF7A6", "#FFC300", "#FF5733", "#C70039", "#900C3F", "#b66e8d",
+            "#61a4ba", "#6178ba", "#54a87f",  "#25328a",
+            "#b6856e", "#0073C2FF", "#EFC000FF", "#868686FF", "#CD534CFF", 
+            "#7AA6DCFF", "#003C67FF", "#8F7700FF", "#3B3B3BFF", "#A73030FF",
+            "#4A6990FF")[1:length(unique(seuratE18fil$RNA_snn_res.0.25))]
+names(colPal) <- unique(seuratE18EYFP$RNA_snn_res.0.25)
+
+DimPlot(seuratE18EYFP, reduction = "umap", group.by = "RNA_snn_res.0.25",
+        cols = colPal, label = TRUE)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+### location
+```{r dimplot loction E18 EYFP pos}
+DimPlot(seuratE18EYFP, reduction = "umap", group.by = "location",
+        cols = collocation)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+```{r featureplot E18 EYFP only}
+genes <- data.frame(gene=rownames(seuratE18EYFP)) %>% 
+    mutate(geneID=gsub("^.*\\.", "", gene)) 
+
+selGenes <- data.frame(geneID=c("Rosa26eyfp", "Mki67", "Acta2", "Myh11", "Ccl19", "Cxcl13", "Cd34", "Icam1","Vcam1", "Pi16")) %>% 
+  left_join(., genes, by = "geneID") 
+
+pList <- sapply(selGenes$gene, function(x){
+  p <- FeaturePlot(seuratE18EYFP, reduction = "umap", 
+            features = x, 
+            cols=c("lightgrey","darkred"),
+            order = T)+
+  theme(legend.position="right")
+  plot(p)
+})
+```
+
+## integrate data across location
+```{r integrate, eval=FALSE, include=TRUE}
+Idents(seuratE18EYFP) <- seuratE18EYFP$location
+
+seurat.list <- SplitObject(object = seuratE18EYFP, split.by = "location")
+for (i in 1:length(x = seurat.list)) {
+    seurat.list[[i]] <- NormalizeData(object = seurat.list[[i]],
+                                      verbose = FALSE)
+    seurat.list[[i]] <- FindVariableFeatures(object = seurat.list[[i]], 
+        selection.method = "vst", nfeatures = 2000, verbose = FALSE)
+}
+
+seurat.anchors <- FindIntegrationAnchors(object.list = seurat.list, dims = 1:20)
+seuratE18EYFP.int <- IntegrateData(anchorset = seurat.anchors, dims = 1:20)
+DefaultAssay(object = seuratE18EYFP.int) <- "integrated"
+
+## rerun seurat
+seuratE18EYFP.int <- ScaleData(object = seuratE18EYFP.int, verbose = FALSE,
+                         features = rownames(seuratE18EYFP.int))
+seuratE18EYFP.int <- RunPCA(object = seuratE18EYFP.int, npcs = 20, verbose = FALSE)
+seuratE18EYFP.int <- RunTSNE(object = seuratE18EYFP.int, recuction = "pca", dims = 1:20)
+seuratE18EYFP.int <- RunUMAP(object = seuratE18EYFP.int, recuction = "pca", dims = 1:20)
+
+seuratE18EYFP.int <- FindNeighbors(object = seuratE18EYFP.int, reduction = "pca", dims = 1:20)
+res <- c(0.6, 0.8, 0.4, 0.25)
+for (i in 1:length(res)){
+  seuratE18EYFP.int <- FindClusters(object = seuratE18EYFP.int, resolution = res[i],
+                              random.seed = 1234)
+}
+```
+
+### load object EYFP integrated
+```{r}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18EYFP_integrated_seurat.rds"
+seuratE18EYFP.int <- readRDS(fileNam)
+```
+
+```{r set default assay int object}
+DefaultAssay(object = seuratE18EYFP.int) <- "RNA"
+seuratE18EYFP.int$intCluster <- seuratE18EYFP.int$integrated_snn_res.0.25
+Idents(seuratE18EYFP.int) <- seuratE18EYFP.int$intCluster
+
+colPal <- c("#DAF7A6", "#FFC300", "#FF5733", "#C70039", "#900C3F", "#b66e8d",
+            "#61a4ba", "#6178ba", "#54a87f", "#25328a", "#b6856e",
+            "#ba6161", "#20714a", "#0073C2FF", "#EFC000FF", "#868686FF", 
+            "#CD534CFF","#7AA6DCFF", "#003C67FF", "#8F7700FF", "#3B3B3BFF",
+            "#A73030FF", "#4A6990FF")[1:length(unique(seuratE18EYFP.int$intCluster))]
+names(colPal) <- unique(seuratE18EYFP.int$intCluster)
+```
+
+## dimplot int data
+### clustering 
+```{r umap int}
+DimPlot(seuratE18EYFP.int, reduction = "umap",
+        label = T, shuffle = T, cols = colPal) +
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("umap1") +
+  ylab("umap2")
+```
+
+### location
+```{r umap int location}
+DimPlot(seuratE18EYFP.int, reduction = "umap", group.by = "location", cols = collocation,
+        shuffle = T) +
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("umap1") +
+  ylab("umap2")
+```
+
+```{r featureplot E18 EYFP only int}
+genes <- data.frame(gene=rownames(seuratE18EYFP.int)) %>% 
+    mutate(geneID=gsub("^.*\\.", "", gene)) 
+
+selGenes <- data.frame(geneID=c("Rosa26eyfp", "Mki67", "Acta2", "Myh11", "Mcam", "Ccl19", "Cxcl13", "Cd34", "Icam1","Vcam1", "Pi16", "Bmp4", "Fmod")) %>% 
+  left_join(., genes, by = "geneID") 
+
+pList <- sapply(selGenes$gene, function(x){
+  p <- FeaturePlot(seuratE18EYFP.int, reduction = "umap", 
+            features = x, 
+            cols=c("lightgrey","darkred"),
+            order = T)+
+  theme(legend.position="right")
+  plot(p)
+})
+```
+
+### assign label
+```{r assign label int clusters}
+seuratE18EYFP.int$label <- "label"
+seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "0")] <- "TRC1"
+seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "1")] <- "ProlifTRC"
+seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "2")] <- "VSMC"
+seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "3")] <- "TRC2"
+seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "4")] <- "PRC"
+seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "5")] <- "ProlifVSMC"
+
+table(seuratE18EYFP.int$label)
+##order
+seuratE18EYFP.int$label <- factor(seuratE18EYFP.int$label, levels = c("TRC1", "TRC2", "ProlifTRC", "PRC", "VSMC", "ProlifVSMC"))
+table(seuratE18EYFP.int$label)
+
+colLab <- c("#900C3F","#b66e8d", "#003C67FF",
+            "#e3953d", "#714542", "#b6856e")
+
+names(colLab) <- c( "TRC1", "TRC2","ProlifTRC", "PRC", "ProlifVSMC", "VSMC")
+```
+
+### save object EYFP int
+```{r, eval=FALSE, eval=FALSE, include=TRUE}
+saveRDS(seuratE18EYFP.int, file="/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18EYFP_integrated_seurat.rds")
+```
+
+### label
+```{r umap int label}
+DimPlot(seuratE18EYFP.int, reduction = "umap", group.by = "label", cols = colLab)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+
+DimPlot(seuratE18EYFP.int, reduction = "umap", group.by = "label", pt.size=0.5,
+        cols = colLab, shuffle = T)+
+  theme_void()
+
+DimPlot(seuratE18EYFP.int, reduction = "umap", group.by = "label", pt.size=0.5,
+        cols = colLab, shuffle = T)+
+  theme_void() + 
+  theme(legend.position = "none") 
+```
+
+## dotplot FRC marker
+```{r dotplot FRC marker, fig.height=8, fig.width=6}
+seurat_markers <- data.frame(gene=c("Fcgr2b","Fcer2a","Cr2","Cxcl13",
+                                    "Slc7a11", "Ccl19", 
+                                    "Ccl21a", "Fmod", "Grem1", "Bmp4",
+                                    "Tnfsf11", "Fbn2",
+                                    "Pltp" ,"C1rb", "Lepr", "Ptn",
+                                     "Nr4a1", "Cxcl10", "Cxcl9", 
+                                    "F3", "Fbln1", "Gdf10", "Adamtsl1", 
+                                    "Col15a1",  "Cd34",
+                                    "Igfbp6", "Pi16", "Thy1", "Dpp4", "Sema3c", 
+                                    "Acta2", "Myh11", "Mcam", "Itga7", "Esam", "Rgs4"
+                                    ))
+
+genes <- data.frame(geneID=rownames(seuratE18EYFP.int)) %>%
+  mutate(gene=gsub(".*\\.", "",  geneID)) 
+
+markerAll <- seurat_markers %>% left_join(., genes, by="gene")
+
+
+## Dotplot all
+Idents(seuratE18EYFP.int) <- seuratE18EYFP.int$label
+
+DotPlot(seuratE18EYFP.int, assay="RNA", features = rev(markerAll$geneID), scale =T,
+        cluster.idents = F) +
+  scale_color_viridis_c() +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_x_discrete(breaks=rev(markerAll$geneID), labels=rev(markerAll$gene)) +
+  xlab("") + ylab("")
+```
+
+## subset version 2 - subset for EYFP expressing cells
+```{r}
+remove(seuratE18EYFP)
+remove(seuratE18EYFP.int)
+```
+
+### subset EYFP positive cells
+```{r subset EYFP pos cells, eval=FALSE, include=FALSE}
+table(seuratE18fil$EYFP)
+seuratE18EYFPv2 <- subset(seuratE18fil, EYFP == "pos")
+table(seuratE18EYFPv2$EYFP)
+
+DimPlot(seuratE18EYFPv2, reduction = "umap", group.by = "RNA_snn_res.0.25",
+        cols = colPal, label = TRUE)
+
+#rerun seurat
+seuratE18EYFPv2 <- NormalizeData (object = seuratE18EYFPv2)
+seuratE18EYFPv2<- FindVariableFeatures(object = seuratE18EYFPv2)
+seuratE18EYFPv2 <- ScaleData(object = seuratE18EYFPv2, verbose = TRUE)
+seuratE18EYFPv2 <- RunPCA(object=seuratE18EYFPv2, npcs = 30, verbose = FALSE)
+seuratE18EYFPv2 <- RunTSNE(object=seuratE18EYFPv2, reduction="pca", dims = 1:20)
+seuratE18EYFPv2 <- RunUMAP(object=seuratE18EYFPv2, reduction="pca", dims = 1:20)
+seuratE18EYFPv2 <- FindNeighbors(object = seuratE18EYFPv2, reduction = "pca", dims= 1:20)
+
+res <- c(0.25, 0.6, 0.8, 0.4)
+for (i in 1:length(res)) {
+  seuratE18EYFPv2 <- FindClusters(object = seuratE18EYFPv2, resolution = res[i], random.seed = 1234)
+}
+```
+
+### save object EYFP 
+```{r, eval=FALSE, include=TRUE}
+saveRDS(seuratE18EYFPv2, file="/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18_EYFPv2_seurat.rds")
+```
+
+### load object EYFP
+```{r}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18_EYFPv2_seurat.rds"
+seuratE18EYFPv2 <- readRDS(fileNam)
+```
+
+## dimplot subset EYFP v2
+### clustering
+```{r dimplot clustering E18 EYFP pos v2}
+Idents(seuratE18EYFPv2) <- seuratE18EYFPv2$RNA_snn_res.0.25
+colPal <- c("#DAF7A6", "#FFC300", "#FF5733", "#C70039", "#900C3F", "#b66e8d",
+            "#61a4ba", "#6178ba", "#54a87f",  "#25328a",
+            "#b6856e", "#0073C2FF", "#EFC000FF", "#868686FF", "#CD534CFF", 
+            "#7AA6DCFF", "#003C67FF", "#8F7700FF", "#3B3B3BFF", "#A73030FF",
+            "#4A6990FF")[1:length(unique(seuratE18EYFPv2$RNA_snn_res.0.25))]
+names(colPal) <- unique(seuratE18EYFPv2$RNA_snn_res.0.25)
+
+DimPlot(seuratE18EYFPv2, reduction = "umap", group.by = "RNA_snn_res.0.25",
+        cols = colPal, label = TRUE)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+### location
+```{r dimplot loction E18 EYFP v2}
+DimPlot(seuratE18EYFPv2, reduction = "umap", group.by = "location",
+        cols = collocation)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+```{r featureplot E18 EYFP only v2}
+genes <- data.frame(gene=rownames(seuratE18EYFPv2)) %>% 
+    mutate(geneID=gsub("^.*\\.", "", gene)) 
+
+selGenes <- data.frame(geneID=c("Rosa26eyfp", "Mki67", "Acta2", "Myh11", "Ccl19", "Cxcl13", "Cd34", "Icam1","Vcam1", "Pi16")) %>% 
+  left_join(., genes, by = "geneID") 
+
+pList <- sapply(selGenes$gene, function(x){
+  p <- FeaturePlot(seuratE18EYFPv2, reduction = "umap", 
+            features = x, 
+            cols=c("lightgrey","darkred"),
+            order = T)+
+  theme(legend.position="right")
+  plot(p)
+})
+```
+
+## integrate data across location v2
+```{r integrate v2, eval=FALSE, include=TRUE}
+Idents(seuratE18EYFPv2) <- seuratE18EYFPv2$location
+
+seurat.list <- SplitObject(object = seuratE18EYFPv2, split.by = "location")
+for (i in 1:length(x = seurat.list)) {
+    seurat.list[[i]] <- NormalizeData(object = seurat.list[[i]],
+                                      verbose = FALSE)
+    seurat.list[[i]] <- FindVariableFeatures(object = seurat.list[[i]], 
+        selection.method = "vst", nfeatures = 2000, verbose = FALSE)
+}
+
+seurat.anchors <- FindIntegrationAnchors(object.list = seurat.list, dims = 1:20)
+seuratE18EYFPv2.int <- IntegrateData(anchorset = seurat.anchors, dims = 1:20)
+DefaultAssay(object = seuratE18EYFPv2.int) <- "integrated"
+
+## rerun seurat
+seuratE18EYFPv2.int <- ScaleData(object = seuratE18EYFPv2.int, verbose = FALSE,
+                         features = rownames(seuratE18EYFPv2.int))
+seuratE18EYFPv2.int <- RunPCA(object = seuratE18EYFPv2.int, npcs = 20, verbose = FALSE)
+seuratE18EYFPv2.int <- RunTSNE(object = seuratE18EYFPv2.int, recuction = "pca", dims = 1:20)
+seuratE18EYFPv2.int <- RunUMAP(object = seuratE18EYFPv2.int, recuction = "pca", dims = 1:20)
+
+seuratE18EYFPv2.int <- FindNeighbors(object = seuratE18EYFPv2.int, reduction = "pca", dims = 1:20)
+res <- c(0.6, 0.8, 0.4, 0.25)
+for (i in 1:length(res)){
+  seuratE18EYFPv2.int <- FindClusters(object = seuratE18EYFPv2.int, resolution = res[i],
+                              random.seed = 1234)
+}
+```
+
+### load object EYFP integrated v2
+```{r}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18EYFPv2_integrated_seurat.rds"
+seuratE18EYFPv2.int <- readRDS(fileNam)
+```
+
+```{r set default assay int object v2}
+DefaultAssay(object = seuratE18EYFPv2.int) <- "RNA"
+seuratE18EYFPv2.int$intCluster <- seuratE18EYFPv2.int$integrated_snn_res.0.25
+Idents(seuratE18EYFPv2.int) <- seuratE18EYFPv2.int$intCluster
+
+colPal <- c("#DAF7A6", "#FFC300", "#FF5733", "#C70039", "#900C3F", "#b66e8d",
+            "#61a4ba", "#6178ba", "#54a87f", "#25328a", "#b6856e",
+            "#ba6161", "#20714a", "#0073C2FF", "#EFC000FF", "#868686FF", 
+            "#CD534CFF","#7AA6DCFF", "#003C67FF", "#8F7700FF", "#3B3B3BFF",
+            "#A73030FF", "#4A6990FF")[1:length(unique(seuratE18EYFPv2.int$intCluster))]
+names(colPal) <- unique(seuratE18EYFPv2.int$intCluster)
+```
+
+## dimplot int data v2
+### clustering 
+```{r umap int v2}
+DimPlot(seuratE18EYFPv2.int, reduction = "umap",
+        label = T, shuffle = T, cols = colPal) +
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("umap1") +
+  ylab("umap2")
+```
+
+### location
+```{r umap int location v2}
+DimPlot(seuratE18EYFPv2.int, reduction = "umap", group.by = "location", cols = collocation,
+        shuffle = T) +
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("umap1") +
+  ylab("umap2")
+```
+
+```{r featureplot E18 EYFP only int v2}
+genes <- data.frame(gene=rownames(seuratE18EYFPv2.int)) %>% 
+    mutate(geneID=gsub("^.*\\.", "", gene)) 
+
+selGenes <- data.frame(geneID=c("Rosa26eyfp", "Mki67", "Acta2", "Myh11", "Mcam", "Ccl19", "Cxcl13", "Cd34", "Icam1","Vcam1", "Pi16", "Bmp4", "Fmod", "Adipoq")) %>% 
+  left_join(., genes, by = "geneID") 
+
+pList <- sapply(selGenes$gene, function(x){
+  p <- FeaturePlot(seuratE18EYFPv2.int, reduction = "umap", 
+            features = x, 
+            cols=c("lightgrey","darkred"),
+            order = T)+
+  theme(legend.position="right")
+  plot(p)
+})
+```
+
+### assign label
+```{r assign label int clusters v2}
+seuratE18EYFPv2.int$label <- "label"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "0")] <- "TRC1"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "1")] <- "ProlifTRC"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "2")] <- "PRC"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "3")] <- "VSMC"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "4")] <- "TRC2"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "5")] <- "Adipoc"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "6")] <- "Mesothelial"
+
+table(seuratE18EYFPv2.int$label)
+##order
+seuratE18EYFPv2.int$label <- factor(seuratE18EYFPv2.int$label, levels = c("TRC1", "TRC2", "ProlifTRC", "PRC", "VSMC", "Adipoc", "Mesothelial"))
+table(seuratE18EYFPv2.int$label)
+
+colLab <- c("#900C3F","#b66e8d", "#003C67FF",
+            "#e3953d", "#714542", "#b6856e","grey")
+
+names(colLab) <- c( "TRC1", "TRC2","ProlifTRC", "PRC", "Adipoc", "VSMC", "Mesothelial")
+```
+
+### label
+```{r umap int label v2}
+DimPlot(seuratE18EYFPv2.int, reduction = "umap", group.by = "label", cols = colLab)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+
+DimPlot(seuratE18EYFPv2.int, reduction = "umap", group.by = "label", pt.size=0.5,
+        cols = colLab, shuffle = T)+
+  theme_void()
+
+DimPlot(seuratE18EYFPv2.int, reduction = "umap", group.by = "label", pt.size=0.5,
+        cols = colLab, shuffle = T)+
+  theme_void() + 
+  theme(legend.position = "none") 
+```
+
+## dotplot FRC marker int v2
+```{r dotplot FRC marker v2, fig.height=8, fig.width=6}
+seurat_markers <- data.frame(gene=c("Fcgr2b","Fcer2a","Cr2","Cxcl13",
+                                    "Slc7a11", "Ccl19", 
+                                    "Ccl21a", "Fmod", "Grem1", "Bmp4",
+                                    "Tnfsf11", "Fbn2",
+                                    "Pltp" ,"C1rb", "Lepr", "Ptn",
+                                     "Nr4a1", "Cxcl10", "Cxcl9", 
+                                    "F3", "Fbln1", "Gdf10", "Adamtsl1", 
+                                    "Col15a1",  "Cd34",
+                                    "Igfbp6", "Pi16", "Thy1", "Dpp4", "Sema3c", 
+                                    "Acta2", "Myh11", "Mcam", "Itga7", "Esam", "Rgs4", "Adipoq", "Mki67", "Msln"
+                                    ))
+
+genes <- data.frame(geneID=rownames(seuratE18EYFPv2.int)) %>%
+  mutate(gene=gsub(".*\\.", "",  geneID)) 
+
+markerAll <- seurat_markers %>% left_join(., genes, by="gene")
+
+
+## Dotplot all
+Idents(seuratE18EYFPv2.int) <- seuratE18EYFPv2.int$label
+
+DotPlot(seuratE18EYFPv2.int, assay="RNA", features = rev(markerAll$geneID), scale =T,
+        cluster.idents = F) +
+  scale_color_viridis_c() +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_x_discrete(breaks=rev(markerAll$geneID), labels=rev(markerAll$gene)) +
+  xlab("") + ylab("")
+```
+
+### save object EYFP int
+```{r, eval=FALSE, include=TRUE}
+saveRDS(seuratE18EYFPv2.int, file="/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18EYFPv2_integrated_seurat.rds")
+```
+
+### calculate marker genes label
+```{r, eval=FALSE, include=FALSE, include=TRUE, eval=FALSE}
+## calculate marker genes
+Idents(seuratE18EYFPv2.int) <- seuratE18EYFPv2.int$label
+levels(seuratE18EYFPv2.int)
+
+markerGenes <- FindAllMarkers(seuratE18EYFPv2.int, only.pos=T) %>% 
+  dplyr::filter(p_val_adj < 0.01) 
+```
+
+## session info
+```{r date and session info}
+date()
+sessionInfo()
+```
