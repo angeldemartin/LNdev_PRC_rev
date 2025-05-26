@@ -1,0 +1,242 @@
+---
+title: "E18_mLN_iLN_EYFPonly_marker"
+author: "A.DeMartin"
+date: "2025-05-23"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+options(width = 100)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, dev = c("png", "pdf"))
+seed <- 1234
+```
+
+## load and preprocess
+### load packages
+```{r load packages, warning=FALSE, include=FALSE}
+library(ExploreSCdataSeurat3)
+library(runSeurat3)
+library(Seurat)
+library(ggpubr)
+library(pheatmap)
+library(SingleCellExperiment)
+library(dplyr)
+library(tidyverse)
+library(viridis)
+library(muscat)
+library(circlize)
+library(destiny)
+library(scater)
+library(metap)
+library(multtest)
+library(clusterProfiler)
+library(org.Mm.eg.db)
+library(msigdbr)
+library(enrichplot)
+library(DOSE)
+library(grid)
+library(gridExtra)
+library(ggupset)
+library(VennDiagram)
+library(NCmisc)
+```
+
+### set color vectors 
+```{r set color vector}
+coltimepoint <- c("#440154FF", "#3B528BFF", "#21908CFF", "#5DC863FF")
+names(coltimepoint) <- c("E18", "P7", "3w", "8w")
+
+collocation <- c("#61baba", "#ba6161")
+names(collocation) <- c("iLN", "mLN")
+```
+
+### load object EYFP integrated v2
+```{r}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18EYFPv2_integrated_seurat.rds"
+seuratE18EYFPv2.int <- readRDS(fileNam)
+```
+
+```{r set default assay int object v2}
+DefaultAssay(object = seuratE18EYFPv2.int) <- "RNA"
+seuratE18EYFPv2.int$intCluster <- seuratE18EYFPv2.int$integrated_snn_res.0.25
+Idents(seuratE18EYFPv2.int) <- seuratE18EYFPv2.int$intCluster
+
+colPal <- c("#DAF7A6", "#FFC300", "#FF5733", "#C70039", "#900C3F", "#b66e8d",
+            "#61a4ba", "#6178ba", "#54a87f", "#25328a", "#b6856e",
+            "#ba6161", "#20714a", "#0073C2FF", "#EFC000FF", "#868686FF", 
+            "#CD534CFF","#7AA6DCFF", "#003C67FF", "#8F7700FF", "#3B3B3BFF",
+            "#A73030FF", "#4A6990FF")[1:length(unique(seuratE18EYFPv2.int$intCluster))]
+names(colPal) <- unique(seuratE18EYFPv2.int$intCluster)
+```
+
+## dimplot int data v2
+### clustering 
+```{r umap int v2}
+DimPlot(seuratE18EYFPv2.int, reduction = "umap",
+        label = T, shuffle = T, cols = colPal) +
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("umap1") +
+  ylab("umap2")
+```
+
+### location
+```{r umap int location v2}
+DimPlot(seuratE18EYFPv2.int, reduction = "umap", group.by = "location", cols = collocation,
+        shuffle = T) +
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("umap1") +
+  ylab("umap2")
+```
+
+### label
+```{r umap int label v2}
+colLab <- c("#900C3F","#b66e8d", "#003C67FF",
+            "#e3953d", "#714542", "#b6856e","grey")
+names(colLab) <- c("mLTo1", "mLTo2", "mLTo3", "mLTo4", "Adipoc", "Mesothelial", "Prolif")
+
+DimPlot(seuratE18EYFPv2.int, reduction = "umap", group.by = "label", cols = colLab)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+
+DimPlot(seuratE18EYFPv2.int, reduction = "umap", group.by = "label", pt.size=0.5,
+        cols = colLab, shuffle = T)+
+  theme_void()
+
+DimPlot(seuratE18EYFPv2.int, reduction = "umap", group.by = "label", pt.size=0.5,
+        cols = colLab, shuffle = T)+
+  theme_void() + 
+  theme(legend.position = "none") 
+```
+
+### calculate marker genes label
+```{r, eval=FALSE, include=FALSE, include=TRUE, eval=FALSE}
+## calculate marker genes
+Idents(seuratE18EYFPv2.int) <- seuratE18EYFPv2.int$label
+levels(seuratE18EYFPv2.int)
+
+markerGenes <- FindAllMarkers(seuratE18EYFPv2.int, only.pos=T) %>% 
+  dplyr::filter(p_val_adj < 0.01) 
+```
+
+```{r, include=FALSE, eval=FALSE}
+#save table
+write.table(markerGenes, 
+            file= "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/markerGenes_E18_EYFPpos_integrated_intCluster",
+            sep="\t",
+            quote=F,
+            row.names=F,
+            col.names=T)
+```
+
+## dotplot FRC marker int v2
+```{r dotplot FRC marker v2, fig.height=10, fig.width=6}
+seurat_markers <- data.frame(gene=c("Vcam1", "Icam1",
+                                    "Cxcl13", "Ccl19", "Ccl21a","Tnfsf11", "Grem1","Ifitm1","Cxcl1","Ifitm3","Ccl2","Nfkbia","Des",
+                                    "Mfap5","Cdkn1c","Akap12","Anxa2","Lox","Gsn","Basp1","Fndc1","Sparc","Col1a1","Fbn2","Nr4a1","Fbln1","Cd34","Pi16",
+                                    "Fbln5","Tm4sf1", "Ntrk3", "Fhl1", "Rgs7bp", "Adamts2", "Mpped2", "Ramp1", "Pdgfrl", "Eln", "Hspb2","Mgp", "Actg2","Acta2", "Myh11", "Mcam", 
+                                    "Adipoq", "Mki67", "Msln"))
+
+genes <- data.frame(geneID=rownames(seuratE18EYFPv2.int)) %>%
+  mutate(gene=gsub(".*\\.", "",  geneID)) 
+
+markerAll <- seurat_markers %>% left_join(., genes, by="gene")
+
+
+## Dotplot all
+Idents(seuratE18EYFPv2.int) <- seuratE18EYFPv2.int$label
+
+DotPlot(seuratE18EYFPv2.int, assay="RNA", features = rev(markerAll$geneID), scale =T,
+        cluster.idents = F) +
+  scale_color_viridis_c() +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_x_discrete(breaks=rev(markerAll$geneID), labels=rev(markerAll$gene)) +
+  xlab("") + ylab("")
+```
+## mLTo signatures
+### convert to sce 
+```{r convert to sce}
+##convert seurat object to sce object
+DefaultAssay(object = seuratE18EYFPv2.int) <- "integrated"
+sce <- as.SingleCellExperiment(seuratE18EYFPv2.int)
+genes <- data.frame(geneID=rownames(sce)) %>% mutate(gene=gsub(".*\\.", "", geneID))
+pal = colorRampPalette(c("#053061", "#2166ac", "#f7f7f7", "#f4a582", "#b2183c", "#85122d"))
+```
+
+### plot signature mLTo1/2
+```{r}
+selGenes <- data.frame(gene=c("Cxcl13", "Ccl19", "Ccl21a","Tnfsf11", "Grem1"))
+signGenes <- genes %>% dplyr::filter(gene %in% selGenes$gene)
+
+##make a count matrix of signature genes
+sceSub <- sce[which(rownames(sce) %in% signGenes$geneID),]
+cntMat <- rowSums(t(as.matrix(
+    sceSub@assays@data$logcounts)))/nrow(signGenes)
+sceSub$sign <- cntMat
+sceSub$sign2 <- sceSub$sign
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 3))
+sceSub$sign2[which(sceSub$sign > 3)] <- 3
+##check max and min values
+max(sceSub$sign)
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
+  theme(legend.position = "none")
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+### plot signature mLTo3
+```{r}
+selGenes <- data.frame(gene=c("Mfap5","Gsn","Fndc1","Col1a1","Cd34"))
+signGenes <- genes %>% dplyr::filter(gene %in% selGenes$gene)
+
+##make a count matrix of signature genes
+sceSub <- sce[which(rownames(sce) %in% signGenes$geneID),]
+cntMat <- rowSums(t(as.matrix(
+    sceSub@assays@data$logcounts)))/nrow(signGenes)
+sceSub$sign <- cntMat
+sceSub$sign2 <- sceSub$sign
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 3))
+sceSub$sign2[which(sceSub$sign > 3)] <- 3
+##check max and min values
+max(sceSub$sign)
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
+  theme(legend.position = "none")
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+### plot signature mLTo4
+```{r}
+selGenes <- data.frame(gene=c("Fbln5","Eln","Actg2","Acta2","Myh11"))
+signGenes <- genes %>% dplyr::filter(gene %in% selGenes$gene)
+
+##make a count matrix of signature genes
+sceSub <- sce[which(rownames(sce) %in% signGenes$geneID),]
+cntMat <- rowSums(t(as.matrix(
+    sceSub@assays@data$logcounts)))/nrow(signGenes)
+sceSub$sign <- cntMat
+sceSub$sign2 <- sceSub$sign
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 3))
+sceSub$sign2[which(sceSub$sign > 3)] <- 3
+##check max and min values
+max(sceSub$sign)
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
+  theme(legend.position = "none")
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+## session info
+```{r date and session info}
+date()
+sessionInfo()
+```
