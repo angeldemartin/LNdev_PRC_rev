@@ -165,6 +165,29 @@ DotPlot(seuratE18EYFPv2.int, assay="RNA", features = rev(markerAll$geneID), scal
   scale_x_discrete(breaks=rev(markerAll$geneID), labels=rev(markerAll$gene)) +
   xlab("") + ylab("")
 ```
+
+## dotplot splenic mLTo signature (Cheng et al, Nat Commun. 2019 - Supplementary Figure 4C and F)
+```{r dotplot spleic mLTo signature, fig.height=5, fig.width=6}
+seurat_markers <- data.frame(gene=c("Pdgfra", "Pdgfrb", "Kitl", "Cdh11", "Loxl1", "Loxl2", "Cd248", "Nkx3-2", "Gli1", "Aldh1b1", "Itga3"))
+
+genes <- data.frame(geneID=rownames(seuratE18EYFPv2.int)) %>%
+  mutate(gene=gsub(".*\\.", "",  geneID)) 
+
+markerAll <- seurat_markers %>% left_join(., genes, by="gene")
+
+
+## Dotplot all
+Idents(seuratE18EYFPv2.int) <- seuratE18EYFPv2.int$label
+
+DotPlot(seuratE18EYFPv2.int, assay="RNA", features = rev(markerAll$geneID), scale =T,
+        cluster.idents = F) +
+  scale_color_viridis_c() +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_x_discrete(breaks=rev(markerAll$geneID), labels=rev(markerAll$gene)) +
+  xlab("") + ylab("")
+```
+
 ## mLTo signatures
 ### convert to sce 
 ```{r convert to sce}
@@ -234,6 +257,48 @@ plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
   theme(legend.position = "none")
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
 ```
+
+### splenic mLTo signature (Cheng et al, Nat Commun. 2019 - Supplementary Figure 4C)
+```{r}
+selGenes <- data.frame(gene=c("Pdgfra", "Pdgfrb", "Kitl", "Cdh11", "Loxl1", "Loxl2", "Cd248", "Nkx3-2", "Gli1", "Aldh1b1"))
+signGenes <- genes %>% dplyr::filter(gene %in% selGenes$gene)
+
+##make a count matrix of signature genes
+sceSub <- sce[which(rownames(sce) %in% signGenes$geneID),]
+cntMat <- rowSums(t(as.matrix(
+    sceSub@assays@data$logcounts)))/nrow(signGenes)
+sceSub$sign <- cntMat
+sceSub$sign2 <- sceSub$sign
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 1.5))
+sceSub$sign2[which(sceSub$sign > 1.5)] <- 1.5
+##check max and min values
+max(sceSub$sign)
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
+  theme(legend.position = "none")
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+### splenic mLTo signature (Cheng et al, Nat Commun. 2019 - Supplementary Figure 4F)
+```{r}
+selGenes <- data.frame(gene=c("Cd248", "Itga3", "Pdgfra", "Pdgfrb", "Gli1", "Nkx3-2"))
+signGenes <- genes %>% dplyr::filter(gene %in% selGenes$gene)
+
+##make a count matrix of signature genes
+sceSub <- sce[which(rownames(sce) %in% signGenes$geneID),]
+cntMat <- rowSums(t(as.matrix(
+    sceSub@assays@data$logcounts)))/nrow(signGenes)
+sceSub$sign <- cntMat
+sceSub$sign2 <- sceSub$sign
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 1.5))
+sceSub$sign2[which(sceSub$sign > 1.5)] <- 1.5
+##check max and min values
+max(sceSub$sign)
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
+  theme(legend.position = "none")
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+
 
 ## session info
 ```{r date and session info}
