@@ -275,22 +275,22 @@ pList <- sapply(selGenes$gene, function(x){
 ### assign label
 ```{r assign label int clusters}
 seuratE18EYFP.int$label <- "label"
-seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "0")] <- "TRC1"
-seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "1")] <- "ProlifTRC"
-seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "2")] <- "VSMC"
-seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "3")] <- "TRC2"
-seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "4")] <- "PRC"
-seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "5")] <- "ProlifVSMC"
+seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "0")] <- "mLTo1"
+seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "1")] <- "Prolif1"
+seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "2")] <- "mLTo3"
+seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "3")] <- "mLTo2"
+seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "4")] <- "mLTo4"
+seuratE18EYFP.int$label[which(seuratE18EYFP.int$intCluster == "5")] <- "Prolif2"
 
 table(seuratE18EYFP.int$label)
 ##order
-seuratE18EYFP.int$label <- factor(seuratE18EYFP.int$label, levels = c("TRC1", "TRC2", "ProlifTRC", "PRC", "VSMC", "ProlifVSMC"))
+seuratE18EYFP.int$label <- factor(seuratE18EYFP.int$label, levels = c("mLTo1", "mLTo2", "mLTo3", "mLTo4", "Prolif1", "Prolif2"))
 table(seuratE18EYFP.int$label)
 
 colLab <- c("#900C3F","#b66e8d", "#003C67FF",
             "#e3953d", "#714542", "#b6856e")
 
-names(colLab) <- c( "TRC1", "TRC2","ProlifTRC", "PRC", "ProlifVSMC", "VSMC")
+names(colLab) <- c("mLTo1", "mLTo2", "mLTo3", "mLTo4", "Prolif1", "Prolif2")
 ```
 
 ### save object EYFP int
@@ -335,7 +335,6 @@ genes <- data.frame(geneID=rownames(seuratE18EYFP.int)) %>%
   mutate(gene=gsub(".*\\.", "",  geneID)) 
 
 markerAll <- seurat_markers %>% left_join(., genes, by="gene")
-
 
 ## Dotplot all
 Idents(seuratE18EYFP.int) <- seuratE18EYFP.int$label
@@ -531,23 +530,22 @@ pList <- sapply(selGenes$gene, function(x){
 ### assign label
 ```{r assign label int clusters v2}
 seuratE18EYFPv2.int$label <- "label"
-seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "0")] <- "TRC1"
-seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "1")] <- "ProlifTRC"
-seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "2")] <- "PRC"
-seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "3")] <- "VSMC"
-seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "4")] <- "TRC2"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "0")] <- "mLTo1"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "1")] <- "Prolif"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "2")] <- "mLTo3"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "3")] <- "mLTo4"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "4")] <- "mLTo2"
 seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "5")] <- "Adipoc"
 seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "6")] <- "Mesothelial"
 
 table(seuratE18EYFPv2.int$label)
 ##order
-seuratE18EYFPv2.int$label <- factor(seuratE18EYFPv2.int$label, levels = c("TRC1", "TRC2", "ProlifTRC", "PRC", "VSMC", "Adipoc", "Mesothelial"))
+seuratE18EYFPv2.int$label <- factor(seuratE18EYFPv2.int$label, levels = c("mLTo1", "mLTo2", "mLTo3", "mLTo4", "Adipoc", "Mesothelial", "Prolif"))
 table(seuratE18EYFPv2.int$label)
 
 colLab <- c("#900C3F","#b66e8d", "#003C67FF",
             "#e3953d", "#714542", "#b6856e","grey")
-
-names(colLab) <- c( "TRC1", "TRC2","ProlifTRC", "PRC", "Adipoc", "VSMC", "Mesothelial")
+names(colLab) <- c("mLTo1", "mLTo2", "mLTo3", "mLTo4", "Adipoc", "Mesothelial", "Prolif")
 ```
 
 ### label
