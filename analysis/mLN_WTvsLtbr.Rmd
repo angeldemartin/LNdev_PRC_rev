@@ -1,0 +1,239 @@
+---
+title: "mLN_WTvsLtbr"
+author: "A.DeMartin"
+date: "2025-06-04"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+options(width = 100)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, dev = c("png", "pdf"))
+seed <- 1234
+```
+
+## load packages
+```{r load packages, warning=FALSE, include=FALSE}
+library(ExploreSCdataSeurat3)
+library(runSeurat3)
+library(Seurat)
+library(ggpubr)
+library(pheatmap)
+library(SingleCellExperiment)
+library(dplyr)
+library(tidyverse)
+library(viridis)
+library(muscat)
+library(circlize)
+library(destiny)
+library(scater)
+library(metap)
+library(multtest)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+library(msigdbr)
+library(enrichplot)
+library(DOSE)
+library(grid)
+library(gridExtra)
+library(ggupset)
+library(VennDiagram)
+library(NCmisc)
+library(slingshot)
+library(RColorBrewer)
+library(tradeSeq)
+library(magrittr)
+library(purrr)
+library(ggsci)
+```
+
+## load object
+```{r}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/WT_allTime_mLNonly_WtplusLtbr_EYFPonly_seurat.rds"
+seurat <- readRDS(fileNam)
+```
+
+```{r}
+colCond <- c("#446a7f", "#cb7457")
+names(colCond) <- c("LTbR", "WT")
+
+colAge <- c("#440154FF", "#3B528BFF", "#21908CFF", "#5DC863FF", "#FDE725FF")
+names(colAge) <- c("E18" , "P7", "3w", "8w","E17to7wk")
+
+colPal <- c("#DAF7A6", "#FFC300", "#FF5733", "#C70039", "#900C3F", "#b66e8d",
+            "#61a4ba", "#6178ba", "#54a87f",  "#25328a",
+            "#b6856e", "#0073C2FF", "#EFC000FF", "#868686FF", "#CD534CFF", 
+            "#7AA6DCFF", "#003C67FF", "#8F7700FF", "#3B3B3BFF", "#A73030FF",
+            "#4A6990FF")[1:length(unique(seurat$RNA_snn_res.0.4))]
+names(colPal) <- unique(seurat$RNA_snn_res.0.4)
+
+colDat <- colDat <- c(pal_npg()(10),pal_futurama()(12), pal_aaas()(10),
+                      pal_jama()(8))[1:length(unique(seurat$dataset))]
+names(colDat) <- unique(seurat$dataset)
+```
+
+## dimplot
+### clustering
+```{r}
+DimPlot(seurat, reduction = "umap", group.by = "RNA_snn_res.0.4",
+        cols = colPal)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+```{r}
+##assign label1
+
+seurat$label1 <- "unassigned"
+seurat$label1[which(seurat$RNA_snn_res.0.4 == "0")] <- "MedRC/IFRC" ## medRC plus IFRC mixed
+seurat$label1[which(seurat$RNA_snn_res.0.4 == "2")] <- "TBRC"   
+seurat$label1[which(seurat$RNA_snn_res.0.4 == "3")] <- "PRC"
+seurat$label1[which(seurat$RNA_snn_res.0.4 == "4")] <- "TRC"
+seurat$label1[which(seurat$RNA_snn_res.0.4 == "9")] <- "FDC/MRC"  ## FDC plus MRC mixed
+seurat$label1[which(seurat$RNA_snn_res.0.4 == "11")] <- "VSMC"
+seurat$label1[which(seurat$age %in% c("3w", "E18", "P7"))] <- "<8wk"
+
+##order
+seurat$label1 <- factor(seurat$label1, levels = c("FDC/MRC", "TBRC" ,"TRC", "MedRC/IFRC", "PRC", "VSMC", "unassigned","<8wk"))
+table(seurat$label1)
+
+colLab <- c("#42a071", "#900C3F","#b66e8d", "#61a4ba", "#424671", "#003C67FF",
+            "#e3953d", "#714542", "#b6856e", "#EFC000FF", "#a4a4a4")
+
+names(colLab) <- c("FDC/MRC", "TRC", "TBRC", "MedRC/IFRC", "MedRC" , "actMedRC",
+                   "PRC", "Pi16+RC", "VSMC", "unassigned", "<8wk")
+```
+
+### label1
+```{r}
+DimPlot(seurat, reduction = "umap", group.by = "label1",
+        cols = colLab)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+### label1 slot by cond
+```{r}
+DimPlot(seurat, reduction = "umap", group.by = "label1",
+        cols = colLab, split.by = "cond")+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+### age
+```{r}
+DimPlot(seurat, reduction = "umap", group.by = "age",
+        cols = colAge)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+### cond
+```{r}
+DimPlot(seurat, reduction = "umap", group.by = "cond",
+        cols = colCond, shuffle=T)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+## dotplot sel genes
+```{r}
+seurat_markers <- data.frame(gene=c("Fcgr2b","Fcer2a","Cr2","Cxcl13",
+                                    "Slc7a11", "Ccl19", 
+                                    "Ccl21a", "Fmod", "Grem1", "Bmp4",
+                                    "Tnfsf11", "Fbn2",
+                                    "Pltp" ,"C1rb", "Lepr", "Ptn",
+                                     "Nr4a1", "Cxcl10", "Cxcl9", 
+                                    "F3", "Fbln1", "Gdf10", "Adamtsl1", 
+                                    "Col15a1",  "Cd34",
+                                    "Igfbp6", "Pi16", "Thy1", "Dpp4", "Sema3c", 
+                                    "Acta2", "Myh11", "Mcam", "Itga7", "Esam", "Rgs4"
+                                    ))
+
+genes <- data.frame(geneID=rownames(seurat)) %>%
+  mutate(gene=gsub(".*\\.", "",  geneID)) 
+
+markerAll <- seurat_markers %>% left_join(., genes, by="gene")
+```
+
+```{r}
+```{r}
+## assign new slot
+seurat$label1_plus_cond <- paste0(seurat$label1, "_", seurat$cond)
+##order
+seurat$label1_plus_cond <- factor(seurat$label1_plus_cond, levels = c("FDC/MRC_WT","FDC/MRC_LTbR", "TBRC_WT" ,"TBRC_LTbR", "TRC_WT" , "TRC_LTbR", "MedRC/IFRC_WT", "MedRC/IFRC_LTbR", "PRC_WT" ,"PRC_LTbR", "VSMC_WT" ,"VSMC_LTbR", "unassigned_WT" , "unassigned_LTbR"))
+table(seurat$label1_plus_cond)
+```
+
+```{r}
+## subset adult
+table(seurat$age)
+seuratA <- subset(seurat, age %in% c("8w", "E17to7wk"))
+table(seuratA$cond)
+
+Idents(seuratA) <- seuratA$label1
+levels(seuratA)
+```
+
+```{r, fig.height=9, fig.width=6}
+DotPlot(seuratA, assay="RNA", features = rev(markerAll$geneID), scale =T,
+        cluster.idents = F) +
+  scale_color_viridis_c() +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_x_discrete(breaks=rev(markerAll$geneID), labels=rev(markerAll$gene)) +
+  xlab("") + ylab("")
+```
+
+```{r, fig.height=9, fig.width=6}
+Idents(seuratA) <- seuratA$label1_plus_cond
+levels(seuratA)
+
+
+DotPlot(seuratA, assay="RNA", features = rev(markerAll$geneID), scale =T,
+        cluster.idents = F) +
+  scale_color_viridis_c() +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_x_discrete(breaks=rev(markerAll$geneID), labels=rev(markerAll$gene)) +
+  xlab("") + ylab("") 
+```
+
+```{r, fig.height=9, fig.width=8}
+Idents(seuratA) <- seuratA$label1_plus_cond
+levels(seuratA)
+
+
+DotPlot(seuratA, assay="RNA", features = rev(markerAll$geneID), scale =T,
+        cluster.idents = F) +
+  scale_color_viridis_c() +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_x_discrete(breaks=rev(markerAll$geneID), labels=rev(markerAll$gene)) +
+  xlab("") + ylab("") 
+```
+
+## session info
+```{r date and session info}
+date()
+sessionInfo()
+```

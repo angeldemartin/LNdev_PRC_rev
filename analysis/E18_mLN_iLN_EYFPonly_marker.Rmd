@@ -553,9 +553,6 @@ plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
 ```
 
-
-
-
 ## session info
 ```{r date and session info}
 date()
