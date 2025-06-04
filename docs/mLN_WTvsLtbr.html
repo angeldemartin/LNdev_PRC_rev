@@ -420,10 +420,10 @@ changes </a>
 <div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown is untracked by Git. To know which version of the R
-Markdown file created these results, you’ll want to first commit it to
-the Git repo. If you’re still working on the analysis, you can ignore
-this warning. When you’re finished, you can run
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
 <code>wflow_publish</code> to commit the R Markdown file and build the
 HTML.</p>
 </div>
@@ -542,15 +542,15 @@ data/WT_allTime_mLNonly_WtplusLtbr_EYFPonly_seurat.rds
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtree06f64c549d8b46ca15feb5dda2135d8eb8978e50targetblank06f64c5a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtree1cf08f4192d737d5b31aedc5485a68928395f4e1targetblank1cf08f4a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/06f64c549d8b46ca15feb5dda2135d8eb8978e50" target="_blank">06f64c5</a>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/1cf08f4192d737d5b31aedc5485a68928395f4e1" target="_blank">1cf08f4</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtree06f64c549d8b46ca15feb5dda2135d8eb8978e50targetblank06f64c5a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtree1cf08f4192d737d5b31aedc5485a68928395f4e1targetblank1cf08f4a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -560,7 +560,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/06f64c549d8b46ca15feb5dda2135d8eb8978e50" target="_blank">06f64c5</a>.
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/1cf08f4192d737d5b31aedc5485a68928395f4e1" target="_blank">1cf08f4</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -578,14 +578,10 @@ Ignored files:
     Ignored:    .DS_Store
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
-
-Untracked files:
-    Untracked:  analysis/mLNEYFPpos.Rmd
-    Untracked:  analysis/mLN_WTvsLtbr.Rmd
+    Ignored:    analysis/.DS_Store
 
 Unstaged changes:
-    Modified:   analysis/E18_mLN_iLN_EYFPonly_marker.Rmd
-    Modified:   analysis/index.Rmd
+    Modified:   analysis/mLN_WTvsLtbr.Rmd
 
 </code></pre>
 <p>
@@ -601,9 +597,72 @@ have uncommitted changes.
 </div>
 <div id="versions" class="tab-pane fade">
 <p>
-There are no past versions. Publish this analysis with
-<code>wflow_publish()</code> to start tracking its development.
+These are the previous versions of the repository in which changes were
+made to the R Markdown (<code>analysis/mLN_WTvsLtbr.Rmd</code>) and HTML
+(<code>docs/mLN_WTvsLtbr.html</code>) files. If you’ve configured a
+remote Git repository (see <code>?wflow_git_remote</code>), click on the
+hyperlinks in the table below to view the files as they were in that
+past version.
 </p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1cf08f4192d737d5b31aedc5485a68928395f4e1/analysis/mLN_WTvsLtbr.Rmd" target="_blank">1cf08f4</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-04
+</td>
+<td>
+june06
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/angeldemartin/LNdev_PRC_rev/1cf08f4192d737d5b31aedc5485a68928395f4e1/docs/mLN_WTvsLtbr.html" target="_blank">1cf08f4</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-04
+</td>
+<td>
+june06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <hr>
 </div>
 </div>
@@ -644,6 +703,43 @@ names(colDat) &lt;- unique(seurat$dataset)</code></pre>
   xlab(&quot;UMAP1&quot;) +
   ylab(&quot;UMAP2&quot;)</code></pre>
 <p><img src="figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-3-1">
+Past versions of unnamed-chunk-3-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-3-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1cf08f4192d737d5b31aedc5485a68928395f4e1/docs/figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-3-1.png" target="_blank">1cf08f4</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-04
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>##assign label1
 
 seurat$label1 &lt;- &quot;unassigned&quot;
@@ -677,6 +773,43 @@ names(colLab) &lt;- c(&quot;FDC/MRC&quot;, &quot;TRC&quot;, &quot;TBRC&quot;, &q
   xlab(&quot;UMAP1&quot;) +
   ylab(&quot;UMAP2&quot;)</code></pre>
 <p><img src="figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-1">
+Past versions of unnamed-chunk-5-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1cf08f4192d737d5b31aedc5485a68928395f4e1/docs/figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-5-1.png" target="_blank">1cf08f4</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-04
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="label1-slot-by-cond" class="section level3">
 <h3>label1 slot by cond</h3>
@@ -688,6 +821,43 @@ names(colLab) &lt;- c(&quot;FDC/MRC&quot;, &quot;TRC&quot;, &quot;TBRC&quot;, &q
   xlab(&quot;UMAP1&quot;) +
   ylab(&quot;UMAP2&quot;)</code></pre>
 <p><img src="figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-1">
+Past versions of unnamed-chunk-6-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1cf08f4192d737d5b31aedc5485a68928395f4e1/docs/figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-6-1.png" target="_blank">1cf08f4</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-04
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="age" class="section level3">
 <h3>age</h3>
@@ -699,6 +869,43 @@ names(colLab) &lt;- c(&quot;FDC/MRC&quot;, &quot;TRC&quot;, &quot;TBRC&quot;, &q
   xlab(&quot;UMAP1&quot;) +
   ylab(&quot;UMAP2&quot;)</code></pre>
 <p><img src="figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-1">
+Past versions of unnamed-chunk-7-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-7-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1cf08f4192d737d5b31aedc5485a68928395f4e1/docs/figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-7-1.png" target="_blank">1cf08f4</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-04
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="cond" class="section level3">
 <h3>cond</h3>
@@ -710,13 +917,50 @@ names(colLab) &lt;- c(&quot;FDC/MRC&quot;, &quot;TRC&quot;, &quot;TBRC&quot;, &q
   xlab(&quot;UMAP1&quot;) +
   ylab(&quot;UMAP2&quot;)</code></pre>
 <p><img src="figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-1">
+Past versions of unnamed-chunk-8-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1cf08f4192d737d5b31aedc5485a68928395f4e1/docs/figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-8-1.png" target="_blank">1cf08f4</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-04
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="dotplot-sel-genes" class="section level2">
 <h2>dotplot sel genes</h2>
 <pre class="r"><code>seurat_markers &lt;- data.frame(gene=c(&quot;Fcgr2b&quot;,&quot;Fcer2a&quot;,&quot;Cr2&quot;,&quot;Cxcl13&quot;,
                                     &quot;Slc7a11&quot;, &quot;Ccl19&quot;, 
-                                    &quot;Ccl21a&quot;, &quot;Fmod&quot;, &quot;Grem1&quot;, &quot;Bmp4&quot;,
+                                    &quot;Ccl21a&quot;, &quot;Fmod&quot;, &quot;Grem1&quot;, &quot;Bmp4&quot;, &quot;Inmt&quot;,
                                     &quot;Tnfsf11&quot;, &quot;Fbn2&quot;,
                                     &quot;Pltp&quot; ,&quot;C1rb&quot;, &quot;Lepr&quot;, &quot;Ptn&quot;,
                                      &quot;Nr4a1&quot;, &quot;Cxcl10&quot;, &quot;Cxcl9&quot;, 
@@ -762,7 +1006,57 @@ levels(seuratA)</code></pre>
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   scale_x_discrete(breaks=rev(markerAll$geneID), labels=rev(markerAll$gene)) +
   xlab(&quot;&quot;) + ylab(&quot;&quot;)</code></pre>
+<p><img src="figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-12-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>Idents(seuratA) &lt;- seuratA$label1_plus_cond
+levels(seuratA)</code></pre>
+<pre><code> [1] &quot;FDC/MRC_WT&quot;      &quot;FDC/MRC_LTbR&quot;    &quot;TBRC_WT&quot;         &quot;TBRC_LTbR&quot;       &quot;TRC_WT&quot;         
+ [6] &quot;TRC_LTbR&quot;        &quot;MedRC/IFRC_WT&quot;   &quot;MedRC/IFRC_LTbR&quot; &quot;PRC_WT&quot;          &quot;PRC_LTbR&quot;       
+[11] &quot;VSMC_WT&quot;         &quot;VSMC_LTbR&quot;       &quot;unassigned_WT&quot;   &quot;unassigned_LTbR&quot;</code></pre>
+<pre class="r"><code>DotPlot(seuratA, assay=&quot;RNA&quot;, features = rev(markerAll$geneID), scale =T,
+        cluster.idents = F) +
+  scale_color_viridis_c() +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_x_discrete(breaks=rev(markerAll$geneID), labels=rev(markerAll$gene)) +
+  xlab(&quot;&quot;) + ylab(&quot;&quot;) </code></pre>
 <p><img src="figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-13-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-13-1">
+Past versions of unnamed-chunk-13-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-13-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1cf08f4192d737d5b31aedc5485a68928395f4e1/docs/figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-13-1.png" target="_blank">1cf08f4</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-04
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>Idents(seuratA) &lt;- seuratA$label1_plus_cond
 levels(seuratA)</code></pre>
 <pre><code> [1] &quot;FDC/MRC_WT&quot;      &quot;FDC/MRC_LTbR&quot;    &quot;TBRC_WT&quot;         &quot;TBRC_LTbR&quot;       &quot;TRC_WT&quot;         
@@ -775,25 +1069,49 @@ levels(seuratA)</code></pre>
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   scale_x_discrete(breaks=rev(markerAll$geneID), labels=rev(markerAll$gene)) +
   xlab(&quot;&quot;) + ylab(&quot;&quot;) </code></pre>
-<p><img src="figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-14-1.png" width="576" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>Idents(seuratA) &lt;- seuratA$label1_plus_cond
-levels(seuratA)</code></pre>
-<pre><code> [1] &quot;FDC/MRC_WT&quot;      &quot;FDC/MRC_LTbR&quot;    &quot;TBRC_WT&quot;         &quot;TBRC_LTbR&quot;       &quot;TRC_WT&quot;         
- [6] &quot;TRC_LTbR&quot;        &quot;MedRC/IFRC_WT&quot;   &quot;MedRC/IFRC_LTbR&quot; &quot;PRC_WT&quot;          &quot;PRC_LTbR&quot;       
-[11] &quot;VSMC_WT&quot;         &quot;VSMC_LTbR&quot;       &quot;unassigned_WT&quot;   &quot;unassigned_LTbR&quot;</code></pre>
-<pre class="r"><code>DotPlot(seuratA, assay=&quot;RNA&quot;, features = rev(markerAll$geneID), scale =T,
-        cluster.idents = F) +
-  scale_color_viridis_c() +
-  coord_flip() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  scale_x_discrete(breaks=rev(markerAll$geneID), labels=rev(markerAll$gene)) +
-  xlab(&quot;&quot;) + ylab(&quot;&quot;) </code></pre>
-<p><img src="figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-15-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-14-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-14-1">
+Past versions of unnamed-chunk-14-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-14-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1cf08f4192d737d5b31aedc5485a68928395f4e1/docs/figure/mLN_WTvsLtbr.Rmd/unnamed-chunk-14-1.png" target="_blank">1cf08f4</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-04
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="session-info" class="section level2">
 <h2>session info</h2>
 <pre class="r"><code>date()</code></pre>
-<pre><code>[1] &quot;Wed Jun  4 17:27:30 2025&quot;</code></pre>
+<pre><code>[1] &quot;Wed Jun  4 17:49:10 2025&quot;</code></pre>
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.4.0 (2024-04-24)
 Platform: x86_64-apple-darwin20
@@ -857,9 +1175,9 @@ loaded via a namespace (and not attached):
  [64] hexbin_1.28.5             zoo_1.8-14                XVector_0.44.0           
  [67] knitr_1.50                ggplot.multistats_1.0.1   UCSC.utils_1.0.0         
  [70] RhpcBLASctl_0.23-42       timechange_0.3.0          foreach_1.5.2            
- [73] patchwork_1.3.0           caTools_1.18.3            data.table_1.17.2        
- [76] ggtree_3.12.0             R.oo_1.27.1               RSpectra_0.16-2          
- [79] irlba_2.3.5.1             fastDummies_1.7.5         gridGraphics_0.5-1       
+ [73] patchwork_1.3.0           caTools_1.18.3            ggtree_3.12.0            
+ [76] data.table_1.17.2         R.oo_1.27.1               RSpectra_0.16-2          
+ [79] irlba_2.3.5.1             gridGraphics_0.5-1        fastDummies_1.7.5        
  [82] lazyeval_0.2.2            yaml_2.3.10               survival_3.8-3           
  [85] scattermore_1.2           crayon_1.5.3              RcppAnnoy_0.0.22         
  [88] progressr_0.15.1          tweenr_2.0.3              later_1.4.2              
@@ -887,36 +1205,36 @@ loaded via a namespace (and not attached):
 [154] memoise_2.0.1             rmarkdown_2.29            scales_1.4.0             
 [157] R.methodsS3_1.8.2         future_1.49.0             RANN_2.6.2               
 [160] Cairo_1.6-2               spatstat.data_3.1-6       rstudioapi_0.17.1        
-[163] cluster_2.1.8.1           mutoss_0.1-13             spatstat.utils_3.1-3     
-[166] hms_1.1.3                 fitdistrplus_1.2-2        cowplot_1.1.3            
-[169] colorspace_2.1-1          rlang_1.1.6               DelayedMatrixStats_1.26.0
-[172] sparseMatrixStats_1.16.0  xts_0.14.1                dotCall64_1.2            
-[175] shinydashboard_0.7.3      ggforce_0.4.2             laeken_0.5.3             
-[178] mgcv_1.9-3                xfun_0.52                 e1071_1.7-16             
-[181] TH.data_1.1-3             iterators_1.0.14          abind_1.4-8              
-[184] GOSemSim_2.30.2           treeio_1.28.0             futile.options_1.0.1     
-[187] bitops_1.0-9              Rdpack_2.6.4              promises_1.3.2           
-[190] scatterpie_0.2.4          RSQLite_2.3.11            qvalue_2.36.0            
-[193] sandwich_3.1-1            fgsea_1.30.0              DelayedArray_0.30.1      
-[196] proxy_0.4-27              GO.db_3.19.1              compiler_4.4.0           
-[199] prettyunits_1.2.0         boot_1.3-31               beachmat_2.20.0          
-[202] listenv_0.9.1             Rcpp_1.0.14               edgeR_4.2.2              
-[205] workflowr_1.7.1           BiocSingular_1.20.0       tensor_1.5               
-[208] MASS_7.3-65               progress_1.2.3            BiocParallel_1.38.0      
-[211] babelgene_22.9            spatstat.random_3.3-3     R6_2.6.1                 
-[214] fastmap_1.2.0             multcomp_1.4-28           fastmatch_1.1-6          
-[217] rstatix_0.7.2             vipor_0.4.7               TTR_0.24.4               
-[220] ROCR_1.0-11               TFisher_0.2.0             rsvd_1.0.5               
-[223] vcd_1.4-13                nnet_7.3-20               gtable_0.3.6             
-[226] KernSmooth_2.23-26        miniUI_0.1.2              deldir_2.0-4             
-[229] htmltools_0.5.8.1         ggthemes_5.1.0            bit64_4.6.0-1            
-[232] spatstat.explore_3.4-2    lifecycle_1.0.4           blme_1.0-6               
-[235] msigdbdf_24.1.1           nloptr_2.2.1              sass_0.4.10              
-[238] vctrs_0.6.5               robustbase_0.99-4-1       spatstat.geom_3.3-6      
-[241] sn_2.1.1                  ggfun_0.1.8               future.apply_1.11.3      
-[244] bslib_0.9.0               pillar_1.10.2             gplots_3.2.0             
-[247] pcaMethods_1.96.0         locfit_1.5-9.12           jsonlite_2.0.0           
-[250] GetoptLong_1.0.5         </code></pre>
+[163] cluster_2.1.8.1           whisker_0.4.1             mutoss_0.1-13            
+[166] spatstat.utils_3.1-3      hms_1.1.3                 fitdistrplus_1.2-2       
+[169] cowplot_1.1.3             colorspace_2.1-1          rlang_1.1.6              
+[172] DelayedMatrixStats_1.26.0 sparseMatrixStats_1.16.0  xts_0.14.1               
+[175] dotCall64_1.2             shinydashboard_0.7.3      ggforce_0.4.2            
+[178] laeken_0.5.3              mgcv_1.9-3                xfun_0.52                
+[181] e1071_1.7-16              TH.data_1.1-3             iterators_1.0.14         
+[184] abind_1.4-8               GOSemSim_2.30.2           treeio_1.28.0            
+[187] futile.options_1.0.1      bitops_1.0-9              Rdpack_2.6.4             
+[190] promises_1.3.2            scatterpie_0.2.4          RSQLite_2.3.11           
+[193] qvalue_2.36.0             sandwich_3.1-1            fgsea_1.30.0             
+[196] DelayedArray_0.30.1       proxy_0.4-27              GO.db_3.19.1             
+[199] compiler_4.4.0            prettyunits_1.2.0         boot_1.3-31              
+[202] beachmat_2.20.0           listenv_0.9.1             Rcpp_1.0.14              
+[205] edgeR_4.2.2               workflowr_1.7.1           BiocSingular_1.20.0      
+[208] tensor_1.5                MASS_7.3-65               progress_1.2.3           
+[211] BiocParallel_1.38.0       babelgene_22.9            spatstat.random_3.3-3    
+[214] R6_2.6.1                  fastmap_1.2.0             multcomp_1.4-28          
+[217] fastmatch_1.1-6           rstatix_0.7.2             vipor_0.4.7              
+[220] TTR_0.24.4                ROCR_1.0-11               TFisher_0.2.0            
+[223] rsvd_1.0.5                vcd_1.4-13                nnet_7.3-20              
+[226] gtable_0.3.6              KernSmooth_2.23-26        miniUI_0.1.2             
+[229] deldir_2.0-4              htmltools_0.5.8.1         ggthemes_5.1.0           
+[232] bit64_4.6.0-1             spatstat.explore_3.4-2    lifecycle_1.0.4          
+[235] blme_1.0-6                msigdbdf_24.1.1           nloptr_2.2.1             
+[238] sass_0.4.10               vctrs_0.6.5               robustbase_0.99-4-1      
+[241] spatstat.geom_3.3-6       sn_2.1.1                  ggfun_0.1.8              
+[244] future.apply_1.11.3       bslib_0.9.0               pillar_1.10.2            
+[247] gplots_3.2.0              pcaMethods_1.96.0         locfit_1.5-9.12          
+[250] jsonlite_2.0.0            GetoptLong_1.0.5         </code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -988,9 +1306,9 @@ loaded via a namespace (and not attached):
  [64] hexbin_1.28.5             zoo_1.8-14                XVector_0.44.0           
  [67] knitr_1.50                ggplot.multistats_1.0.1   UCSC.utils_1.0.0         
  [70] RhpcBLASctl_0.23-42       timechange_0.3.0          foreach_1.5.2            
- [73] patchwork_1.3.0           caTools_1.18.3            data.table_1.17.2        
- [76] ggtree_3.12.0             R.oo_1.27.1               RSpectra_0.16-2          
- [79] irlba_2.3.5.1             fastDummies_1.7.5         gridGraphics_0.5-1       
+ [73] patchwork_1.3.0           caTools_1.18.3            ggtree_3.12.0            
+ [76] data.table_1.17.2         R.oo_1.27.1               RSpectra_0.16-2          
+ [79] irlba_2.3.5.1             gridGraphics_0.5-1        fastDummies_1.7.5        
  [82] lazyeval_0.2.2            yaml_2.3.10               survival_3.8-3           
  [85] scattermore_1.2           crayon_1.5.3              RcppAnnoy_0.0.22         
  [88] progressr_0.15.1          tweenr_2.0.3              later_1.4.2              
@@ -1018,36 +1336,36 @@ loaded via a namespace (and not attached):
 [154] memoise_2.0.1             rmarkdown_2.29            scales_1.4.0             
 [157] R.methodsS3_1.8.2         future_1.49.0             RANN_2.6.2               
 [160] Cairo_1.6-2               spatstat.data_3.1-6       rstudioapi_0.17.1        
-[163] cluster_2.1.8.1           mutoss_0.1-13             spatstat.utils_3.1-3     
-[166] hms_1.1.3                 fitdistrplus_1.2-2        cowplot_1.1.3            
-[169] colorspace_2.1-1          rlang_1.1.6               DelayedMatrixStats_1.26.0
-[172] sparseMatrixStats_1.16.0  xts_0.14.1                dotCall64_1.2            
-[175] shinydashboard_0.7.3      ggforce_0.4.2             laeken_0.5.3             
-[178] mgcv_1.9-3                xfun_0.52                 e1071_1.7-16             
-[181] TH.data_1.1-3             iterators_1.0.14          abind_1.4-8              
-[184] GOSemSim_2.30.2           treeio_1.28.0             futile.options_1.0.1     
-[187] bitops_1.0-9              Rdpack_2.6.4              promises_1.3.2           
-[190] scatterpie_0.2.4          RSQLite_2.3.11            qvalue_2.36.0            
-[193] sandwich_3.1-1            fgsea_1.30.0              DelayedArray_0.30.1      
-[196] proxy_0.4-27              GO.db_3.19.1              compiler_4.4.0           
-[199] prettyunits_1.2.0         boot_1.3-31               beachmat_2.20.0          
-[202] listenv_0.9.1             Rcpp_1.0.14               edgeR_4.2.2              
-[205] workflowr_1.7.1           BiocSingular_1.20.0       tensor_1.5               
-[208] MASS_7.3-65               progress_1.2.3            BiocParallel_1.38.0      
-[211] babelgene_22.9            spatstat.random_3.3-3     R6_2.6.1                 
-[214] fastmap_1.2.0             multcomp_1.4-28           fastmatch_1.1-6          
-[217] rstatix_0.7.2             vipor_0.4.7               TTR_0.24.4               
-[220] ROCR_1.0-11               TFisher_0.2.0             rsvd_1.0.5               
-[223] vcd_1.4-13                nnet_7.3-20               gtable_0.3.6             
-[226] KernSmooth_2.23-26        miniUI_0.1.2              deldir_2.0-4             
-[229] htmltools_0.5.8.1         ggthemes_5.1.0            bit64_4.6.0-1            
-[232] spatstat.explore_3.4-2    lifecycle_1.0.4           blme_1.0-6               
-[235] msigdbdf_24.1.1           nloptr_2.2.1              sass_0.4.10              
-[238] vctrs_0.6.5               robustbase_0.99-4-1       spatstat.geom_3.3-6      
-[241] sn_2.1.1                  ggfun_0.1.8               future.apply_1.11.3      
-[244] bslib_0.9.0               pillar_1.10.2             gplots_3.2.0             
-[247] pcaMethods_1.96.0         locfit_1.5-9.12           jsonlite_2.0.0           
-[250] GetoptLong_1.0.5         </code></pre>
+[163] cluster_2.1.8.1           whisker_0.4.1             mutoss_0.1-13            
+[166] spatstat.utils_3.1-3      hms_1.1.3                 fitdistrplus_1.2-2       
+[169] cowplot_1.1.3             colorspace_2.1-1          rlang_1.1.6              
+[172] DelayedMatrixStats_1.26.0 sparseMatrixStats_1.16.0  xts_0.14.1               
+[175] dotCall64_1.2             shinydashboard_0.7.3      ggforce_0.4.2            
+[178] laeken_0.5.3              mgcv_1.9-3                xfun_0.52                
+[181] e1071_1.7-16              TH.data_1.1-3             iterators_1.0.14         
+[184] abind_1.4-8               GOSemSim_2.30.2           treeio_1.28.0            
+[187] futile.options_1.0.1      bitops_1.0-9              Rdpack_2.6.4             
+[190] promises_1.3.2            scatterpie_0.2.4          RSQLite_2.3.11           
+[193] qvalue_2.36.0             sandwich_3.1-1            fgsea_1.30.0             
+[196] DelayedArray_0.30.1       proxy_0.4-27              GO.db_3.19.1             
+[199] compiler_4.4.0            prettyunits_1.2.0         boot_1.3-31              
+[202] beachmat_2.20.0           listenv_0.9.1             Rcpp_1.0.14              
+[205] edgeR_4.2.2               workflowr_1.7.1           BiocSingular_1.20.0      
+[208] tensor_1.5                MASS_7.3-65               progress_1.2.3           
+[211] BiocParallel_1.38.0       babelgene_22.9            spatstat.random_3.3-3    
+[214] R6_2.6.1                  fastmap_1.2.0             multcomp_1.4-28          
+[217] fastmatch_1.1-6           rstatix_0.7.2             vipor_0.4.7              
+[220] TTR_0.24.4                ROCR_1.0-11               TFisher_0.2.0            
+[223] rsvd_1.0.5                vcd_1.4-13                nnet_7.3-20              
+[226] gtable_0.3.6              KernSmooth_2.23-26        miniUI_0.1.2             
+[229] deldir_2.0-4              htmltools_0.5.8.1         ggthemes_5.1.0           
+[232] bit64_4.6.0-1             spatstat.explore_3.4-2    lifecycle_1.0.4          
+[235] blme_1.0-6                msigdbdf_24.1.1           nloptr_2.2.1             
+[238] sass_0.4.10               vctrs_0.6.5               robustbase_0.99-4-1      
+[241] spatstat.geom_3.3-6       sn_2.1.1                  ggfun_0.1.8              
+[244] future.apply_1.11.3       bslib_0.9.0               pillar_1.10.2            
+[247] gplots_3.2.0              pcaMethods_1.96.0         locfit_1.5-9.12          
+[250] jsonlite_2.0.0            GetoptLong_1.0.5         </code></pre>
 </div>
 </div>
 </div>

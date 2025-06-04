@@ -159,7 +159,7 @@ DimPlot(seurat, reduction = "umap", group.by = "cond",
 ```{r}
 seurat_markers <- data.frame(gene=c("Fcgr2b","Fcer2a","Cr2","Cxcl13",
                                     "Slc7a11", "Ccl19", 
-                                    "Ccl21a", "Fmod", "Grem1", "Bmp4",
+                                    "Ccl21a", "Fmod", "Grem1", "Bmp4", "Inmt",
                                     "Tnfsf11", "Fbn2",
                                     "Pltp" ,"C1rb", "Lepr", "Ptn",
                                      "Nr4a1", "Cxcl10", "Cxcl9", 
@@ -175,7 +175,6 @@ genes <- data.frame(geneID=rownames(seurat)) %>%
 markerAll <- seurat_markers %>% left_join(., genes, by="gene")
 ```
 
-```{r}
 ```{r}
 ## assign new slot
 seurat$label1_plus_cond <- paste0(seurat$label1, "_", seurat$cond)
