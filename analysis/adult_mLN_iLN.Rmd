@@ -1,0 +1,206 @@
+---
+title: "adult_mLN_iLN"
+author: "A.DeMartin"
+date: "2025-06-05"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+options(width = 100)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, dev = c("png", "pdf"))
+seed <- 1234
+```
+
+## load packages
+```{r load packages, warning=FALSE, include=FALSE}
+library(ExploreSCdataSeurat3)
+library(runSeurat3)
+library(Seurat)
+library(ggpubr)
+library(pheatmap)
+library(SingleCellExperiment)
+library(dplyr)
+library(tidyverse)
+library(viridis)
+library(muscat)
+library(circlize)
+library(destiny)
+library(scater)
+library(metap)
+library(multtest)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+library(msigdbr)
+library(enrichplot)
+library(DOSE)
+library(grid)
+library(gridExtra)
+library(ggupset)
+library(VennDiagram)
+library(NCmisc)
+library(slingshot)
+library(RColorBrewer)
+library(tradeSeq)
+library(magrittr)
+library(purrr)
+library(ggsci)
+```
+
+## load object
+```{r}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/WT_adultOnly_bothLabeled_integrated__seurat.rds"
+seurat <- readRDS(fileNam)
+```
+
+```{r}
+colCond <- c("#446a7f", "#cb7457")
+names(colCond) <- c("LTbR", "WT")
+
+colAge <- c("#440154FF", "#3B528BFF", "#21908CFF", "#5DC863FF", "#FDE725FF")
+names(colAge) <- c("E18" , "P7", "3w", "8w","E17to7wk")
+
+colPal <- c("#DAF7A6", "#FFC300", "#FF5733", "#C70039", "#900C3F", "#b66e8d",
+            "#61a4ba", "#6178ba", "#54a87f",  "#25328a",
+            "#b6856e", "#0073C2FF", "#EFC000FF", "#868686FF", "#CD534CFF", 
+            "#7AA6DCFF", "#003C67FF", "#8F7700FF", "#3B3B3BFF", "#A73030FF",
+            "#4A6990FF")[1:length(unique(seurat$RNA_snn_res.0.4))]
+names(colPal) <- unique(seurat$RNA_snn_res.0.4)
+
+colDat <- colDat <- c(pal_npg()(10),pal_futurama()(12), pal_aaas()(10),
+                      pal_jama()(8))[1:length(unique(seurat$dataset))]
+names(colDat) <- unique(seurat$dataset)
+
+colLoc <- c("#61baba", "#ba6161")
+names(colLoc) <- unique(seurat$location)
+
+colLab <- c("#42a071", "#900C3F","#b66e8d", "#61a4ba", "#424671", "#b1b8fa",
+            "#e3953d", "#714542", "#b6856e")
+
+names(colLab) <- c("FDC/MRC", "TRC", "TBRC", "MedRC/IFRC", "MedRC" , "actMedRC",
+                   "PRC", "Pi16+RC", "VSMC")
+```
+
+## dimplot
+### clustering
+```{r}
+DimPlot(seurat, reduction = "umap",
+        cols = colPal)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+
+### clustering
+```{r}
+DimPlot(seurat, reduction = "umap", group.by = "label", cols = colLab)+
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("UMAP1") +
+  ylab("UMAP2")
+```
+## rel abundances
+### rel abundance for each dataset
+```{r abundance dataset, fig.height=10, fig.width=5}
+datList <- NULL
+for(con in unique(seurat$dataset)){
+  seuratSub <- subset(seurat, dataset==con)
+  print(dim(seuratSub))
+  dat_con <- as.data.frame(table(seuratSub$label)) %>%
+  mutate(percent=Freq/ncol(seuratSub)) %>% mutate(dataset=con)
+  datList[[con]] <- dat_con
+}
+dat_all <- do.call("rbind", datList)
+
+## plot abundance
+ggbarplot(dat_all, x= "dataset", y= "percent", fill = "Var1", palette = colLab, legend = "right", legend.titel = "cluster", ylab = "frequency")  + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) #+ scale_x_discrete(limits=ordered_files)
+```
+
+### fractions according to datasets and location
+```{r fractions, fig.height=6, fig.width=8}
+## 1. create data.frame with cluster counts per dataset
+datFrac <- data.frame(table(seurat$dataset, seurat$label))
+colnames(datFrac) <- c("dataset", "subset", "cnt")
+
+## 2. get total counts per patient to compute relative abundances from
+## I added cond here as grouping variable for the plotting later ...
+datSumPat <- data.frame(table(seurat$dataset, seurat$location)) %>% 
+  filter(Freq >0)
+colnames(datSumPat) <- c("dataset", "location", "cntPatTot")
+
+## 3. join data.frames to compute rel abundances per patient
+datFracSum <- datFrac %>% left_join(., datSumPat, by = "dataset") %>% 
+  mutate(relCnt = cnt/cntPatTot)
+
+## plot barplot with abundances for each subset grouped by cond
+ggbarplot(datFracSum, x = "subset", y = "relCnt",
+          fill = "location", color = "location",
+          palette = colLoc,
+          add = c("mean_se", "dotplot"),
+          add.params = list(color="black", fill="location", size=0.2),
+          position = position_dodge(0.9),
+          xlab = "subset",
+          ylab = "relative abundance",
+          legend = "right",
+          legend.title = "") +
+  rotate_x_text(angle = 90) 
+```
+
+```{r fractions indiv subsets}
+## plot barplot with abundances for individual subsets
+Idents(seurat) <- seurat$label
+clusterVec <- levels(seurat)
+createClusterPlot <- function(cluster) {
+  datFracSumC <- datFracSum %>% filter(subset == cluster)
+
+  ggbarplot(datFracSumC, x = "location", y = "relCnt",
+            fill = "location", color = "location",
+            palette = colLoc,
+            add = c("mean_se", "dotplot"),
+            size = 5,
+            add.params = list(color = "black", fill = "location"),
+            position = position_dodge(0.9),
+            xlab = cluster,
+            ylab = "relative abundance",
+            legend = "right",
+            legend.title = "") +
+    stat_compare_means(method = "t.test", label.y = 0.0)
+}
+lapply(clusterVec, createClusterPlot)
+```
+
+```{r fractions indiv subsets-2}
+## plot barplot with abundances for individual subsets
+Idents(seurat) <- seurat$label
+clusterVec <- levels(seurat)
+createClusterPlot <- function(cluster) {
+  datFracSumC <- datFracSum %>% filter(subset == cluster)
+
+  ggbarplot(datFracSumC, x = "location", y = "relCnt",
+            fill = "location", color = "location",
+            palette = colLoc,
+            add = c("mean_se", "dotplot"),
+            size = 5,
+            add.params = list(color = "black", fill = "location"),
+            position = position_dodge(0.9),
+            xlab = cluster,
+            ylab = "relative abundance",
+            legend = "right",
+            legend.title = "") +
+    stat_compare_means(method = "wilcox.test", label.y = 0.0)
+}
+lapply(clusterVec, createClusterPlot)
+```
+
+## session info
+```{r date and session info}
+date()
+sessionInfo()
+```
