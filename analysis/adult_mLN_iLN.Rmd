@@ -123,6 +123,10 @@ dat_all <- do.call("rbind", datList)
 ggbarplot(dat_all, x= "dataset", y= "percent", fill = "Var1", palette = colLab, legend = "right", legend.titel = "cluster", ylab = "frequency")  + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) #+ scale_x_discrete(limits=ordered_files)
 ```
 
+```{r}
+table(seurat$dataset)
+```
+
 ### fractions according to datasets and location
 ```{r fractions, fig.height=6, fig.width=8}
 ## 1. create data.frame with cluster counts per dataset
