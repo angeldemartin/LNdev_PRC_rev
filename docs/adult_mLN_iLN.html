@@ -542,15 +542,15 @@ data/WT_adultOnly_bothLabeled_integrated__seurat.rds
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtree27dcac4c366331333b5b1ca96f9a0892802c0c78targetblank27dcac4a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtree1b6fb6093c61781a87426c180eaff86d35ca3923targetblank1b6fb60a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/27dcac4c366331333b5b1ca96f9a0892802c0c78" target="_blank">27dcac4</a>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/1b6fb6093c61781a87426c180eaff86d35ca3923" target="_blank">1b6fb60</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtree27dcac4c366331333b5b1ca96f9a0892802c0c78targetblank27dcac4a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtree1b6fb6093c61781a87426c180eaff86d35ca3923targetblank1b6fb60a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -560,7 +560,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/27dcac4c366331333b5b1ca96f9a0892802c0c78" target="_blank">27dcac4</a>.
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/1b6fb6093c61781a87426c180eaff86d35ca3923" target="_blank">1b6fb60</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -581,7 +581,6 @@ Ignored files:
     Ignored:    analysis/.DS_Store
 
 Unstaged changes:
-    Deleted:    E18_mLN_iLN_EYFPonly_marker.md
     Modified:   analysis/adult_mLN_iLN.Rmd
 
 </code></pre>
@@ -627,6 +626,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/analysis/adult_mLN_iLN.Rmd" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+<td>
+june17
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/angeldemartin/LNdev_PRC_rev/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/adult_mLN_iLN.html" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+<td>
+june17
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1766,7 +1799,7 @@ for (lbl in unique_labels) {
 seurat_sub &lt;- subset(seurat, label == lbl)
 
 markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
-  filter(p_val_adj &lt; 0.1) %&gt;%
+  filter(p_val_adj &lt; 0.01) %&gt;%
   top_n(100, avg_log2FC) %&gt;%
   mutate(label = lbl)
 
@@ -1785,10 +1818,121 @@ class="section level3">
 <h3>distribution of logFC of top 100 DE genes iLN vs mLN</h3>
 <pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20DE%20iLN%20vs%20mLN-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-DE-iLN-vs-mLN-1">
+Past versions of "top100 DE iLN vs mLN-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-DE-iLN-vs-mLN-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 DE iLN vs mLN-1.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20DE%20iLN%20vs%20mLN-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-DE-iLN-vs-mLN-2">
+Past versions of "top100 DE iLN vs mLN-2.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-DE-iLN-vs-mLN-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 DE iLN vs mLN-2.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20DE%20iLN%20vs%20mLN-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-DE-iLN-vs-mLN-3">
+Past versions of "top100 DE iLN vs mLN-3.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-DE-iLN-vs-mLN-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 DE iLN vs mLN-3.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="de-genes-iln-vs-mln-top200" class="section level3">
 <h3>DE genes iLN vs mLN top200</h3>
@@ -1804,7 +1948,7 @@ for (lbl in unique_labels) {
 seurat_sub &lt;- subset(seurat, label == lbl)
 
 markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
-  filter(p_val_adj &lt; 0.1) %&gt;%
+  filter(p_val_adj &lt; 0.01) %&gt;%
   top_n(200, avg_log2FC) %&gt;%
   mutate(label = lbl)
 
@@ -1823,10 +1967,121 @@ class="section level3">
 <h3>distribution of logFC of top 200 DE genes iLN vs mLN</h3>
 <pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top200%20DE%20iLN%20vs%20mLN-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top200-DE-iLN-vs-mLN-1">
+Past versions of "top200 DE iLN vs mLN-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-top200-DE-iLN-vs-mLN-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN-1.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top200%20DE%20iLN%20vs%20mLN-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top200-DE-iLN-vs-mLN-2">
+Past versions of "top200 DE iLN vs mLN-2.png"
+</button>
+</p>
+<div id="fig-no-spaces-top200-DE-iLN-vs-mLN-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN-2.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top200%20DE%20iLN%20vs%20mLN-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top200-DE-iLN-vs-mLN-3">
+Past versions of "top200 DE iLN vs mLN-3.png"
+</button>
+</p>
+<div id="fig-no-spaces-top200-DE-iLN-vs-mLN-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN-3.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="de-genes-iln-vs-mln-top100-up-in-iln" class="section level3">
 <h3>DE genes iLN vs mLN top100 up in iLN</h3>
@@ -1843,7 +2098,7 @@ seurat_sub &lt;- subset(seurat, label == lbl)
 
 markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
   filter(cluster == &quot;iLN&quot;) %&gt;%
-  filter(p_val_adj &lt; 0.1) %&gt;%
+  filter(p_val_adj &lt; 0.01) %&gt;%
   top_n(100, avg_log2FC) %&gt;%
   mutate(label = lbl)
 
@@ -1862,10 +2117,121 @@ class="section level3">
 <h3>distribution of logFC of top 100 up in iLN</h3>
 <pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20iLN-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-up-in-iLN-1">
+Past versions of "top100 up in iLN-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-up-in-iLN-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN-1.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20iLN-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-up-in-iLN-2">
+Past versions of "top100 up in iLN-2.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-up-in-iLN-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN-2.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20iLN-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-up-in-iLN-3">
+Past versions of "top100 up in iLN-3.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-up-in-iLN-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN-3.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="de-genes-iln-vs-mln-top100-up-in-mln" class="section level3">
 <h3>DE genes iLN vs mLN top100 up in mLN</h3>
@@ -1882,7 +2248,7 @@ seurat_sub &lt;- subset(seurat, label == lbl)
 
 markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
   filter(cluster == &quot;mLN&quot;) %&gt;%
-  filter(p_val_adj &lt; 0.1) %&gt;%
+  filter(p_val_adj &lt; 0.01) %&gt;%
   top_n(100, avg_log2FC) %&gt;%
   mutate(label = lbl)
 
@@ -1901,10 +2267,121 @@ class="section level3">
 <h3>distribution of logFC of top 100 up in mLN</h3>
 <pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20mLN-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-up-in-mLN-1">
+Past versions of "top100 up in mLN-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-up-in-mLN-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN-1.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20mLN-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-up-in-mLN-2">
+Past versions of "top100 up in mLN-2.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-up-in-mLN-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN-2.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20mLN-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-up-in-mLN-3">
+Past versions of "top100 up in mLN-3.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-up-in-mLN-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN-3.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="now-top-100-based-on-p_val_adj" class="section level2">
@@ -1923,7 +2400,7 @@ for (lbl in unique_labels) {
 seurat_sub &lt;- subset(seurat, label == lbl)
 
 markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
-  filter(p_val_adj &lt; 0.1) %&gt;%
+  filter(p_val_adj &lt; 0.01) %&gt;%
   top_n(100, -(p_val_adj)) %&gt;%
   mutate(label = lbl)
 
@@ -1942,10 +2419,124 @@ class="section level3">
 <h3>distribution of logFC of top 100 DE genes iLN vs mLN</h3>
 <pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20DE%20iLN%20vs%20mLN%20based%20on%20p_val_adj-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-DE-iLN-vs-mLN-based-on-p_val_adj-1">
+Past versions of "top100 DE iLN vs mLN based on p_val_adj-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-DE-iLN-vs-mLN-based-on-p_val_adj-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 DE iLN vs mLN based on p_val_adj-1.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20DE%20iLN%20vs%20mLN%20based%20on%20p_val_adj-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-DE-iLN-vs-mLN-based-on-p_val_adj-2">
+Past versions of "top100 DE iLN vs mLN based on p_val_adj-2.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-DE-iLN-vs-mLN-based-on-p_val_adj-2"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 DE iLN vs mLN based on p_val_adj-2.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20DE%20iLN%20vs%20mLN%20based%20on%20p_val_adj-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-DE-iLN-vs-mLN-based-on-p_val_adj-3">
+Past versions of "top100 DE iLN vs mLN based on p_val_adj-3.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-DE-iLN-vs-mLN-based-on-p_val_adj-3"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 DE iLN vs mLN based on p_val_adj-3.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="de-genes-iln-vs-mln-top200-1" class="section level3">
 <h3>DE genes iLN vs mLN top200</h3>
@@ -1961,7 +2552,7 @@ for (lbl in unique_labels) {
 seurat_sub &lt;- subset(seurat, label == lbl)
 
 markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
-  filter(p_val_adj &lt; 0.1) %&gt;%
+  filter(p_val_adj &lt; 0.01) %&gt;%
   top_n(200, -(p_val_adj)) %&gt;%
   mutate(label = lbl)
 
@@ -1980,10 +2571,124 @@ class="section level3">
 <h3>distribution of logFC of top 200 DE genes iLN vs mLN</h3>
 <pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top200%20DE%20iLN%20vs%20mLN%20based%20on%20p_val_adj-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top200-DE-iLN-vs-mLN-based-on-p_val_adj-1">
+Past versions of "top200 DE iLN vs mLN based on p_val_adj-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-top200-DE-iLN-vs-mLN-based-on-p_val_adj-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN based on p_val_adj-1.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top200%20DE%20iLN%20vs%20mLN%20based%20on%20p_val_adj-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top200-DE-iLN-vs-mLN-based-on-p_val_adj-2">
+Past versions of "top200 DE iLN vs mLN based on p_val_adj-2.png"
+</button>
+</p>
+<div id="fig-no-spaces-top200-DE-iLN-vs-mLN-based-on-p_val_adj-2"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN based on p_val_adj-2.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top200%20DE%20iLN%20vs%20mLN%20based%20on%20p_val_adj-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top200-DE-iLN-vs-mLN-based-on-p_val_adj-3">
+Past versions of "top200 DE iLN vs mLN based on p_val_adj-3.png"
+</button>
+</p>
+<div id="fig-no-spaces-top200-DE-iLN-vs-mLN-based-on-p_val_adj-3"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN based on p_val_adj-3.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="de-genes-iln-vs-mln-top100-up-in-iln-1" class="section level3">
 <h3>DE genes iLN vs mLN top100 up in iLN</h3>
@@ -2000,7 +2705,7 @@ seurat_sub &lt;- subset(seurat, label == lbl)
 
 markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
   filter(cluster == &quot;iLN&quot;) %&gt;%
-  filter(p_val_adj &lt; 0.1) %&gt;%
+  filter(p_val_adj &lt; 0.01) %&gt;%
   top_n(100, -(p_val_adj)) %&gt;%
   mutate(label = lbl)
 
@@ -2019,10 +2724,124 @@ class="section level3">
 <h3>distribution of logFC of top 100 up in iLN</h3>
 <pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20iLN%20-%20based%20on%20p_val_adj-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-up-in-iLN---based-on-p_val_adj-1">
+Past versions of "top100 up in iLN - based on p_val_adj-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-up-in-iLN---based-on-p_val_adj-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN - based on p_val_adj-1.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20iLN%20-%20based%20on%20p_val_adj-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-up-in-iLN---based-on-p_val_adj-2">
+Past versions of "top100 up in iLN - based on p_val_adj-2.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-up-in-iLN---based-on-p_val_adj-2"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN - based on p_val_adj-2.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20iLN%20-%20based%20on%20p_val_adj-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-up-in-iLN---based-on-p_val_adj-3">
+Past versions of "top100 up in iLN - based on p_val_adj-3.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-up-in-iLN---based-on-p_val_adj-3"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN - based on p_val_adj-3.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="de-genes-iln-vs-mln-top100-up-in-mln-1" class="section level3">
 <h3>DE genes iLN vs mLN top100 up in mLN</h3>
@@ -2039,7 +2858,7 @@ seurat_sub &lt;- subset(seurat, label == lbl)
 
 markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
   filter(cluster == &quot;mLN&quot;) %&gt;%
-  filter(p_val_adj &lt; 0.1) %&gt;%
+  filter(p_val_adj &lt; 0.01) %&gt;%
   top_n(100, -(p_val_adj)) %&gt;%
   mutate(label = lbl)
 
@@ -2058,16 +2877,130 @@ class="section level3">
 <h3>distribution of logFC of top 100 up in mLN</h3>
 <pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20mLN%20-%20based%20on%20p_val_adj-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-up-in-mLN---based-on-p_val_adj-1">
+Past versions of "top100 up in mLN - based on p_val_adj-1.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-up-in-mLN---based-on-p_val_adj-1"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN - based on p_val_adj-1.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20mLN%20-%20based%20on%20p_val_adj-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-up-in-mLN---based-on-p_val_adj-2">
+Past versions of "top100 up in mLN - based on p_val_adj-2.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-up-in-mLN---based-on-p_val_adj-2"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN - based on p_val_adj-2.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
 <p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20mLN%20-%20based%20on%20p_val_adj-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-no-spaces-top100-up-in-mLN---based-on-p_val_adj-3">
+Past versions of "top100 up in mLN - based on p_val_adj-3.png"
+</button>
+</p>
+<div id="fig-no-spaces-top100-up-in-mLN---based-on-p_val_adj-3"
+class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN - based on p_val_adj-3.png" target="_blank">1b6fb60</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="session-info" class="section level2">
 <h2>session info</h2>
 <pre class="r"><code>date()</code></pre>
-<pre><code>[1] &quot;Tue Jun 17 14:53:27 2025&quot;</code></pre>
+<pre><code>[1] &quot;Tue Jun 17 15:48:45 2025&quot;</code></pre>
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.4.0 (2024-04-24)
 Platform: x86_64-apple-darwin20

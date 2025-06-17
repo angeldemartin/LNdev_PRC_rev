@@ -219,7 +219,7 @@ for (lbl in unique_labels) {
 seurat_sub <- subset(seurat, label == lbl)
 
 markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
-  filter(p_val_adj < 0.1) %>%
+  filter(p_val_adj < 0.01) %>%
   top_n(100, avg_log2FC) %>%
   mutate(label = lbl)
 
@@ -257,7 +257,7 @@ for (lbl in unique_labels) {
 seurat_sub <- subset(seurat, label == lbl)
 
 markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
-  filter(p_val_adj < 0.1) %>%
+  filter(p_val_adj < 0.01) %>%
   top_n(200, avg_log2FC) %>%
   mutate(label = lbl)
 
@@ -296,7 +296,7 @@ seurat_sub <- subset(seurat, label == lbl)
 
 markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
   filter(cluster == "iLN") %>%
-  filter(p_val_adj < 0.1) %>%
+  filter(p_val_adj < 0.01) %>%
   top_n(100, avg_log2FC) %>%
   mutate(label = lbl)
 
@@ -335,7 +335,7 @@ seurat_sub <- subset(seurat, label == lbl)
 
 markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
   filter(cluster == "mLN") %>%
-  filter(p_val_adj < 0.1) %>%
+  filter(p_val_adj < 0.01) %>%
   top_n(100, avg_log2FC) %>%
   mutate(label = lbl)
 
@@ -374,7 +374,7 @@ for (lbl in unique_labels) {
 seurat_sub <- subset(seurat, label == lbl)
 
 markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
-  filter(p_val_adj < 0.1) %>%
+  filter(p_val_adj < 0.01) %>%
   top_n(100, -(p_val_adj)) %>%
   mutate(label = lbl)
 
@@ -412,7 +412,7 @@ for (lbl in unique_labels) {
 seurat_sub <- subset(seurat, label == lbl)
 
 markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
-  filter(p_val_adj < 0.1) %>%
+  filter(p_val_adj < 0.01) %>%
   top_n(200, -(p_val_adj)) %>%
   mutate(label = lbl)
 
@@ -455,7 +455,7 @@ seurat_sub <- subset(seurat, label == lbl)
 
 markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
   filter(cluster == "iLN") %>%
-  filter(p_val_adj < 0.1) %>%
+  filter(p_val_adj < 0.01) %>%
   top_n(100, -(p_val_adj)) %>%
   mutate(label = lbl)
 
@@ -494,7 +494,7 @@ seurat_sub <- subset(seurat, label == lbl)
 
 markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
   filter(cluster == "mLN") %>%
-  filter(p_val_adj < 0.1) %>%
+  filter(p_val_adj < 0.01) %>%
   top_n(100, -(p_val_adj)) %>%
   mutate(label = lbl)
 
