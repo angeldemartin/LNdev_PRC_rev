@@ -382,7 +382,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2025-06-05
+<strong>Last updated:</strong> 2025-06-17
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -542,15 +542,15 @@ data/WT_adultOnly_bothLabeled_integrated__seurat.rds
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtree87188923aa8986f6b925379e1d9e646da132e2a9targetblank8718892a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtree27dcac4c366331333b5b1ca96f9a0892802c0c78targetblank27dcac4a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/87188923aa8986f6b925379e1d9e646da132e2a9" target="_blank">8718892</a>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/27dcac4c366331333b5b1ca96f9a0892802c0c78" target="_blank">27dcac4</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtree87188923aa8986f6b925379e1d9e646da132e2a9targetblank8718892a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtree27dcac4c366331333b5b1ca96f9a0892802c0c78targetblank27dcac4a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -560,7 +560,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/87188923aa8986f6b925379e1d9e646da132e2a9" target="_blank">8718892</a>.
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/27dcac4c366331333b5b1ca96f9a0892802c0c78" target="_blank">27dcac4</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -581,6 +581,7 @@ Ignored files:
     Ignored:    analysis/.DS_Store
 
 Unstaged changes:
+    Deleted:    E18_mLN_iLN_EYFPonly_marker.md
     Modified:   analysis/adult_mLN_iLN.Rmd
 
 </code></pre>
@@ -626,6 +627,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/27dcac4c366331333b5b1ca96f9a0892802c0c78/analysis/adult_mLN_iLN.Rmd" target="_blank">27dcac4</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-10
+</td>
+<td>
+june10
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/angeldemartin/LNdev_PRC_rev/27dcac4c366331333b5b1ca96f9a0892802c0c78/docs/adult_mLN_iLN.html" target="_blank">27dcac4</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-10
+</td>
+<td>
+june10
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1715,14 +1750,328 @@ angeldemartin
 </div>
 </div>
 </div>
+<div id="de-genes-iln-vs-mln" class="section level2">
+<h2>DE genes iLN vs mLN</h2>
+<div id="de-genes-iln-vs-mln-top100" class="section level3">
+<h3>DE genes iLN vs mLN top100</h3>
+<pre class="r"><code>Idents(seurat) &lt;- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels &lt;- unique(seurat$label)
+DEGenes_by_label &lt;- list()
+
+for (lbl in unique_labels) {
+  message(&quot;Processing label: &quot;, lbl)
+  
+# Subset Seurat object for this label
+seurat_sub &lt;- subset(seurat, label == lbl)
+
+markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
+  filter(p_val_adj &lt; 0.1) %&gt;%
+  top_n(100, avg_log2FC) %&gt;%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] &lt;- markers
+} 
+
+all_DEGenes &lt;- bind_rows(DEGenes_by_label)
+
+ordX &lt;- c(&quot;FDC/MRC&quot;, &quot;TRC&quot;, &quot;TBRC&quot;, &quot;MedRC/IFRC&quot;, &quot;MedRC&quot; , &quot;actMedRC&quot;,
+                   &quot;PRC&quot;, &quot;Pi16+RC&quot;, &quot;VSMC&quot;)
+
+all_DEGenes$label &lt;- factor(all_DEGenes$label, levels = ordX)</code></pre>
+</div>
+<div id="distribution-of-logfc-of-top-100-de-genes-iln-vs-mln"
+class="section level3">
+<h3>distribution of logFC of top 100 DE genes iLN vs mLN</h3>
+<pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20DE%20iLN%20vs%20mLN-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20DE%20iLN%20vs%20mLN-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20DE%20iLN%20vs%20mLN-3.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="de-genes-iln-vs-mln-top200" class="section level3">
+<h3>DE genes iLN vs mLN top200</h3>
+<pre class="r"><code>Idents(seurat) &lt;- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels &lt;- unique(seurat$label)
+DEGenes_by_label &lt;- list()
+
+for (lbl in unique_labels) {
+  message(&quot;Processing label: &quot;, lbl)
+  
+# Subset Seurat object for this label
+seurat_sub &lt;- subset(seurat, label == lbl)
+
+markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
+  filter(p_val_adj &lt; 0.1) %&gt;%
+  top_n(200, avg_log2FC) %&gt;%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] &lt;- markers
+} 
+
+all_DEGenes &lt;- bind_rows(DEGenes_by_label)
+
+ordX &lt;- c(&quot;FDC/MRC&quot;, &quot;TRC&quot;, &quot;TBRC&quot;, &quot;MedRC/IFRC&quot;, &quot;MedRC&quot; , &quot;actMedRC&quot;,
+                   &quot;PRC&quot;, &quot;Pi16+RC&quot;, &quot;VSMC&quot;)
+
+all_DEGenes$label &lt;- factor(all_DEGenes$label, levels = ordX)</code></pre>
+</div>
+<div id="distribution-of-logfc-of-top-200-de-genes-iln-vs-mln"
+class="section level3">
+<h3>distribution of logFC of top 200 DE genes iLN vs mLN</h3>
+<pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top200%20DE%20iLN%20vs%20mLN-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top200%20DE%20iLN%20vs%20mLN-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top200%20DE%20iLN%20vs%20mLN-3.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="de-genes-iln-vs-mln-top100-up-in-iln" class="section level3">
+<h3>DE genes iLN vs mLN top100 up in iLN</h3>
+<pre class="r"><code>Idents(seurat) &lt;- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels &lt;- unique(seurat$label)
+DEGenes_by_label &lt;- list()
+
+for (lbl in unique_labels) {
+  message(&quot;Processing label: &quot;, lbl)
+  
+# Subset Seurat object for this label
+seurat_sub &lt;- subset(seurat, label == lbl)
+
+markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
+  filter(cluster == &quot;iLN&quot;) %&gt;%
+  filter(p_val_adj &lt; 0.1) %&gt;%
+  top_n(100, avg_log2FC) %&gt;%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] &lt;- markers
+} 
+
+all_DEGenes &lt;- bind_rows(DEGenes_by_label)
+
+ordX &lt;- c(&quot;FDC/MRC&quot;, &quot;TRC&quot;, &quot;TBRC&quot;, &quot;MedRC/IFRC&quot;, &quot;MedRC&quot; , &quot;actMedRC&quot;,
+                   &quot;PRC&quot;, &quot;Pi16+RC&quot;, &quot;VSMC&quot;)
+
+all_DEGenes$label &lt;- factor(all_DEGenes$label, levels = ordX)</code></pre>
+</div>
+<div id="distribution-of-logfc-of-top-100-up-in-iln"
+class="section level3">
+<h3>distribution of logFC of top 100 up in iLN</h3>
+<pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20iLN-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20iLN-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20iLN-3.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="de-genes-iln-vs-mln-top100-up-in-mln" class="section level3">
+<h3>DE genes iLN vs mLN top100 up in mLN</h3>
+<pre class="r"><code>Idents(seurat) &lt;- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels &lt;- unique(seurat$label)
+DEGenes_by_label &lt;- list()
+
+for (lbl in unique_labels) {
+  message(&quot;Processing label: &quot;, lbl)
+  
+# Subset Seurat object for this label
+seurat_sub &lt;- subset(seurat, label == lbl)
+
+markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
+  filter(cluster == &quot;mLN&quot;) %&gt;%
+  filter(p_val_adj &lt; 0.1) %&gt;%
+  top_n(100, avg_log2FC) %&gt;%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] &lt;- markers
+} 
+
+all_DEGenes &lt;- bind_rows(DEGenes_by_label)
+
+ordX &lt;- c(&quot;FDC/MRC&quot;, &quot;TRC&quot;, &quot;TBRC&quot;, &quot;MedRC/IFRC&quot;, &quot;MedRC&quot; , &quot;actMedRC&quot;,
+                   &quot;PRC&quot;, &quot;Pi16+RC&quot;, &quot;VSMC&quot;)
+
+all_DEGenes$label &lt;- factor(all_DEGenes$label, levels = ordX)</code></pre>
+</div>
+<div id="distribution-of-logfc-of-top-100-up-in-mln"
+class="section level3">
+<h3>distribution of logFC of top 100 up in mLN</h3>
+<pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20mLN-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20mLN-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20mLN-3.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="now-top-100-based-on-p_val_adj" class="section level2">
+<h2>now top 100 based on p_val_adj</h2>
+<div id="de-genes-iln-vs-mln-top100-1" class="section level3">
+<h3>DE genes iLN vs mLN top100</h3>
+<pre class="r"><code>Idents(seurat) &lt;- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels &lt;- unique(seurat$label)
+DEGenes_by_label &lt;- list()
+
+for (lbl in unique_labels) {
+  message(&quot;Processing label: &quot;, lbl)
+  
+# Subset Seurat object for this label
+seurat_sub &lt;- subset(seurat, label == lbl)
+
+markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
+  filter(p_val_adj &lt; 0.1) %&gt;%
+  top_n(100, -(p_val_adj)) %&gt;%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] &lt;- markers
+} 
+
+all_DEGenes &lt;- bind_rows(DEGenes_by_label)
+
+ordX &lt;- c(&quot;FDC/MRC&quot;, &quot;TRC&quot;, &quot;TBRC&quot;, &quot;MedRC/IFRC&quot;, &quot;MedRC&quot; , &quot;actMedRC&quot;,
+                   &quot;PRC&quot;, &quot;Pi16+RC&quot;, &quot;VSMC&quot;)
+
+all_DEGenes$label &lt;- factor(all_DEGenes$label, levels = ordX)</code></pre>
+</div>
+<div id="distribution-of-logfc-of-top-100-de-genes-iln-vs-mln-1"
+class="section level3">
+<h3>distribution of logFC of top 100 DE genes iLN vs mLN</h3>
+<pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20DE%20iLN%20vs%20mLN%20based%20on%20p_val_adj-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20DE%20iLN%20vs%20mLN%20based%20on%20p_val_adj-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20DE%20iLN%20vs%20mLN%20based%20on%20p_val_adj-3.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="de-genes-iln-vs-mln-top200-1" class="section level3">
+<h3>DE genes iLN vs mLN top200</h3>
+<pre class="r"><code>Idents(seurat) &lt;- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels &lt;- unique(seurat$label)
+DEGenes_by_label &lt;- list()
+
+for (lbl in unique_labels) {
+  message(&quot;Processing label: &quot;, lbl)
+  
+# Subset Seurat object for this label
+seurat_sub &lt;- subset(seurat, label == lbl)
+
+markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
+  filter(p_val_adj &lt; 0.1) %&gt;%
+  top_n(200, -(p_val_adj)) %&gt;%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] &lt;- markers
+} 
+
+all_DEGenes &lt;- bind_rows(DEGenes_by_label)
+
+ordX &lt;- c(&quot;FDC/MRC&quot;, &quot;TRC&quot;, &quot;TBRC&quot;, &quot;MedRC/IFRC&quot;, &quot;MedRC&quot; , &quot;actMedRC&quot;,
+                   &quot;PRC&quot;, &quot;Pi16+RC&quot;, &quot;VSMC&quot;)
+
+all_DEGenes$label &lt;- factor(all_DEGenes$label, levels = ordX)</code></pre>
+</div>
+<div id="distribution-of-logfc-of-top-200-de-genes-iln-vs-mln-1"
+class="section level3">
+<h3>distribution of logFC of top 200 DE genes iLN vs mLN</h3>
+<pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top200%20DE%20iLN%20vs%20mLN%20based%20on%20p_val_adj-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top200%20DE%20iLN%20vs%20mLN%20based%20on%20p_val_adj-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top200%20DE%20iLN%20vs%20mLN%20based%20on%20p_val_adj-3.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="de-genes-iln-vs-mln-top100-up-in-iln-1" class="section level3">
+<h3>DE genes iLN vs mLN top100 up in iLN</h3>
+<pre class="r"><code>Idents(seurat) &lt;- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels &lt;- unique(seurat$label)
+DEGenes_by_label &lt;- list()
+
+for (lbl in unique_labels) {
+  message(&quot;Processing label: &quot;, lbl)
+  
+# Subset Seurat object for this label
+seurat_sub &lt;- subset(seurat, label == lbl)
+
+markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
+  filter(cluster == &quot;iLN&quot;) %&gt;%
+  filter(p_val_adj &lt; 0.1) %&gt;%
+  top_n(100, -(p_val_adj)) %&gt;%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] &lt;- markers
+} 
+
+all_DEGenes &lt;- bind_rows(DEGenes_by_label)
+
+ordX &lt;- c(&quot;FDC/MRC&quot;, &quot;TRC&quot;, &quot;TBRC&quot;, &quot;MedRC/IFRC&quot;, &quot;MedRC&quot; , &quot;actMedRC&quot;,
+                   &quot;PRC&quot;, &quot;Pi16+RC&quot;, &quot;VSMC&quot;)
+
+all_DEGenes$label &lt;- factor(all_DEGenes$label, levels = ordX)</code></pre>
+</div>
+<div id="distribution-of-logfc-of-top-100-up-in-iln-1"
+class="section level3">
+<h3>distribution of logFC of top 100 up in iLN</h3>
+<pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20iLN%20-%20based%20on%20p_val_adj-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20iLN%20-%20based%20on%20p_val_adj-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20iLN%20-%20based%20on%20p_val_adj-3.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="de-genes-iln-vs-mln-top100-up-in-mln-1" class="section level3">
+<h3>DE genes iLN vs mLN top100 up in mLN</h3>
+<pre class="r"><code>Idents(seurat) &lt;- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels &lt;- unique(seurat$label)
+DEGenes_by_label &lt;- list()
+
+for (lbl in unique_labels) {
+  message(&quot;Processing label: &quot;, lbl)
+  
+# Subset Seurat object for this label
+seurat_sub &lt;- subset(seurat, label == lbl)
+
+markers &lt;- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %&gt;%
+  filter(cluster == &quot;mLN&quot;) %&gt;%
+  filter(p_val_adj &lt; 0.1) %&gt;%
+  top_n(100, -(p_val_adj)) %&gt;%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] &lt;- markers
+} 
+
+all_DEGenes &lt;- bind_rows(DEGenes_by_label)
+
+ordX &lt;- c(&quot;FDC/MRC&quot;, &quot;TRC&quot;, &quot;TBRC&quot;, &quot;MedRC/IFRC&quot;, &quot;MedRC&quot; , &quot;actMedRC&quot;,
+                   &quot;PRC&quot;, &quot;Pi16+RC&quot;, &quot;VSMC&quot;)
+
+all_DEGenes$label &lt;- factor(all_DEGenes$label, levels = ordX)</code></pre>
+</div>
+<div id="distribution-of-logfc-of-top-100-up-in-mln-1"
+class="section level3">
+<h3>distribution of logFC of top 100 up in mLN</h3>
+<pre class="r"><code>ggdensity(all_DEGenes, x = &quot;avg_log2FC&quot;, add= &quot;median&quot;, rug = TRUE, color = &quot;label&quot;, fill = &quot;label&quot;, palette = colLab)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20mLN%20-%20based%20on%20p_val_adj-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggviolin(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, fill = &quot;label&quot;, palette = colLab, add = &quot;median_iqr&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20mLN%20-%20based%20on%20p_val_adj-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggboxplot(all_DEGenes, x = &quot;label&quot;, y = &quot;avg_log2FC&quot;, color = &quot;label&quot;, palette = colLab ,add = &quot;jitter&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/top100%20up%20in%20mLN%20-%20based%20on%20p_val_adj-3.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
 <div id="session-info" class="section level2">
 <h2>session info</h2>
 <pre class="r"><code>date()</code></pre>
-<pre><code>[1] &quot;Thu Jun  5 12:40:13 2025&quot;</code></pre>
+<pre><code>[1] &quot;Tue Jun 17 14:53:27 2025&quot;</code></pre>
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.4.0 (2024-04-24)
 Platform: x86_64-apple-darwin20
-Running under: macOS Ventura 13.7.5
+Running under: macOS Ventura 13.7.6
 
 Matrix products: default
 BLAS:   /Library/Frameworks/R.framework/Versions/4.4-x86_64/Resources/lib/libRblas.0.dylib 
@@ -1742,7 +2091,7 @@ other attached packages:
  [4] RColorBrewer_1.1-3          slingshot_2.12.0            TrajectoryUtils_1.12.0     
  [7] princurve_2.1.6             NCmisc_1.2.0                VennDiagram_1.7.3          
 [10] futile.logger_1.4.3         ggupset_0.4.1               gridExtra_2.3              
-[13] DOSE_3.30.5                 enrichplot_1.24.4           msigdbr_10.0.2             
+[13] DOSE_3.30.5                 enrichplot_1.24.4           msigdbr_24.1.0             
 [16] org.Hs.eg.db_3.19.1         AnnotationDbi_1.66.0        clusterProfiler_4.12.6     
 [19] multtest_2.60.0             metap_1.12                  scater_1.32.1              
 [22] scuttle_1.14.0              destiny_3.18.0              circlize_0.4.16            
@@ -1753,7 +2102,7 @@ other attached packages:
 [37] SingleCellExperiment_1.26.0 SummarizedExperiment_1.34.0 Biobase_2.64.0             
 [40] GenomicRanges_1.56.2        GenomeInfoDb_1.40.1         IRanges_2.38.1             
 [43] S4Vectors_0.42.1            BiocGenerics_0.50.0         MatrixGenerics_1.16.0      
-[46] matrixStats_1.5.0           pheatmap_1.0.12             ggpubr_0.6.0               
+[46] matrixStats_1.5.0           pheatmap_1.0.13             ggpubr_0.6.0               
 [49] ggplot2_3.5.2               Seurat_5.3.0                SeuratObject_5.1.0         
 [52] sp_2.2-0                    runSeurat3_0.1.0            ExploreSCdataSeurat3_0.1.0 
 
@@ -1766,7 +2115,7 @@ loaded via a namespace (and not attached):
  [16] png_0.1-8                 plotrix_3.8-4             cli_3.6.5                
  [19] ggplotify_0.1.2           goftest_1.2-3             VIM_6.2.2                
  [22] variancePartition_1.34.0  BiocNeighbors_1.22.0      shadowtext_0.1.4         
- [25] uwot_0.2.3                curl_6.2.2                tidytree_0.4.6           
+ [25] uwot_0.2.3                curl_6.2.3                tidytree_0.4.6           
  [28] mime_0.13                 evaluate_1.0.3            ComplexHeatmap_2.20.0    
  [31] stringi_1.8.7             backports_1.5.0           lmerTest_3.1-3           
  [34] qqconf_1.3.2              httpuv_1.6.16             rappdirs_0.3.3           
@@ -1783,7 +2132,7 @@ loaded via a namespace (and not attached):
  [67] knitr_1.50                ggplot.multistats_1.0.1   UCSC.utils_1.0.0         
  [70] RhpcBLASctl_0.23-42       timechange_0.3.0          foreach_1.5.2            
  [73] patchwork_1.3.0           caTools_1.18.3            ggtree_3.12.0            
- [76] data.table_1.17.2         R.oo_1.27.1               RSpectra_0.16-2          
+ [76] data.table_1.17.4         R.oo_1.27.1               RSpectra_0.16-2          
  [79] irlba_2.3.5.1             gridGraphics_0.5-1        fastDummies_1.7.5        
  [82] lazyeval_0.2.2            yaml_2.3.10               survival_3.8-3           
  [85] scattermore_1.2           crayon_1.5.3              RcppAnnoy_0.0.22         
@@ -1802,43 +2151,43 @@ loaded via a namespace (and not attached):
 [124] farver_2.1.2              tzdb_0.5.0                remaCor_0.0.18           
 [127] reshape2_1.4.4            yulab.utils_0.2.0         glue_1.8.0               
 [130] cachem_1.1.0              polyclip_1.10-7           generics_0.1.4           
-[133] Biostrings_2.72.1         mvtnorm_1.3-3             parallelly_1.44.0        
-[136] mnormt_2.1.1              statmod_1.5.0             RcppHNSW_0.6.0           
-[139] ScaledMatrix_1.12.0       carData_3.0-5             minqa_1.2.8              
-[142] pbapply_1.7-2             httr2_1.1.2               spam_2.11-1              
-[145] gson_0.1.0                graphlayouts_1.2.2        gtools_3.9.5             
-[148] ggsignif_0.6.4            RcppEigen_0.3.4.0.2       shiny_1.10.0             
-[151] GenomeInfoDbData_1.2.12   glmmTMB_1.1.11            R.utils_2.13.0           
-[154] memoise_2.0.1             rmarkdown_2.29            scales_1.4.0             
-[157] R.methodsS3_1.8.2         future_1.49.0             RANN_2.6.2               
-[160] Cairo_1.6-2               spatstat.data_3.1-6       rstudioapi_0.17.1        
-[163] cluster_2.1.8.1           whisker_0.4.1             mutoss_0.1-13            
-[166] spatstat.utils_3.1-3      hms_1.1.3                 fitdistrplus_1.2-2       
-[169] cowplot_1.1.3             colorspace_2.1-1          rlang_1.1.6              
-[172] DelayedMatrixStats_1.26.0 sparseMatrixStats_1.16.0  xts_0.14.1               
-[175] dotCall64_1.2             shinydashboard_0.7.3      ggforce_0.4.2            
-[178] laeken_0.5.3              mgcv_1.9-3                xfun_0.52                
-[181] e1071_1.7-16              TH.data_1.1-3             iterators_1.0.14         
-[184] abind_1.4-8               GOSemSim_2.30.2           treeio_1.28.0            
-[187] futile.options_1.0.1      bitops_1.0-9              Rdpack_2.6.4             
-[190] promises_1.3.2            scatterpie_0.2.4          RSQLite_2.3.11           
-[193] qvalue_2.36.0             sandwich_3.1-1            fgsea_1.30.0             
-[196] DelayedArray_0.30.1       proxy_0.4-27              GO.db_3.19.1             
-[199] compiler_4.4.0            prettyunits_1.2.0         boot_1.3-31              
-[202] beachmat_2.20.0           listenv_0.9.1             Rcpp_1.0.14              
-[205] edgeR_4.2.2               workflowr_1.7.1           BiocSingular_1.20.0      
-[208] tensor_1.5                MASS_7.3-65               progress_1.2.3           
-[211] BiocParallel_1.38.0       babelgene_22.9            spatstat.random_3.3-3    
-[214] R6_2.6.1                  fastmap_1.2.0             multcomp_1.4-28          
-[217] fastmatch_1.1-6           rstatix_0.7.2             vipor_0.4.7              
-[220] TTR_0.24.4                ROCR_1.0-11               TFisher_0.2.0            
-[223] rsvd_1.0.5                vcd_1.4-13                nnet_7.3-20              
-[226] gtable_0.3.6              KernSmooth_2.23-26        miniUI_0.1.2             
-[229] deldir_2.0-4              htmltools_0.5.8.1         ggthemes_5.1.0           
-[232] bit64_4.6.0-1             spatstat.explore_3.4-2    lifecycle_1.0.4          
-[235] blme_1.0-6                msigdbdf_24.1.1           nloptr_2.2.1             
+[133] Biostrings_2.72.1         mvtnorm_1.3-3             presto_1.0.0             
+[136] parallelly_1.45.0         mnormt_2.1.1              statmod_1.5.0            
+[139] RcppHNSW_0.6.0            ScaledMatrix_1.12.0       carData_3.0-5            
+[142] minqa_1.2.8               pbapply_1.7-2             httr2_1.1.2              
+[145] spam_2.11-1               gson_0.1.0                graphlayouts_1.2.2       
+[148] gtools_3.9.5              ggsignif_0.6.4            RcppEigen_0.3.4.0.2      
+[151] shiny_1.10.0              GenomeInfoDbData_1.2.12   glmmTMB_1.1.11           
+[154] R.utils_2.13.0            memoise_2.0.1             rmarkdown_2.29           
+[157] scales_1.4.0              R.methodsS3_1.8.2         future_1.58.0            
+[160] RANN_2.6.2                Cairo_1.6-2               spatstat.data_3.1-6      
+[163] rstudioapi_0.17.1         cluster_2.1.8.1           whisker_0.4.1            
+[166] mutoss_0.1-13             spatstat.utils_3.1-4      hms_1.1.3                
+[169] fitdistrplus_1.2-2        cowplot_1.1.3             colorspace_2.1-1         
+[172] rlang_1.1.6               DelayedMatrixStats_1.26.0 sparseMatrixStats_1.16.0 
+[175] xts_0.14.1                dotCall64_1.2             shinydashboard_0.7.3     
+[178] ggforce_0.4.2             laeken_0.5.3              mgcv_1.9-3               
+[181] xfun_0.52                 e1071_1.7-16              TH.data_1.1-3            
+[184] iterators_1.0.14          abind_1.4-8               GOSemSim_2.30.2          
+[187] treeio_1.28.0             futile.options_1.0.1      bitops_1.0-9             
+[190] Rdpack_2.6.4              promises_1.3.3            scatterpie_0.2.4         
+[193] RSQLite_2.4.0             qvalue_2.36.0             sandwich_3.1-1           
+[196] fgsea_1.30.0              DelayedArray_0.30.1       proxy_0.4-27             
+[199] GO.db_3.19.1              compiler_4.4.0            prettyunits_1.2.0        
+[202] boot_1.3-31               beachmat_2.20.0           listenv_0.9.1            
+[205] Rcpp_1.0.14               edgeR_4.2.2               workflowr_1.7.1          
+[208] BiocSingular_1.20.0       tensor_1.5                MASS_7.3-65              
+[211] progress_1.2.3            BiocParallel_1.38.0       babelgene_22.9           
+[214] spatstat.random_3.4-1     R6_2.6.1                  fastmap_1.2.0            
+[217] multcomp_1.4-28           fastmatch_1.1-6           rstatix_0.7.2            
+[220] vipor_0.4.7               TTR_0.24.4                ROCR_1.0-11              
+[223] TFisher_0.2.0             rsvd_1.0.5                vcd_1.4-13               
+[226] nnet_7.3-20               gtable_0.3.6              KernSmooth_2.23-26       
+[229] miniUI_0.1.2              deldir_2.0-4              htmltools_0.5.8.1        
+[232] ggthemes_5.1.0            bit64_4.6.0-1             spatstat.explore_3.4-3   
+[235] lifecycle_1.0.4           blme_1.0-6                nloptr_2.2.1             
 [238] sass_0.4.10               vctrs_0.6.5               robustbase_0.99-4-1      
-[241] spatstat.geom_3.3-6       sn_2.1.1                  ggfun_0.1.8              
+[241] spatstat.geom_3.4-1       sn_2.1.1                  ggfun_0.1.8              
 [244] future.apply_1.11.3       bslib_0.9.0               pillar_1.10.2            
 [247] gplots_3.2.0              pcaMethods_1.96.0         locfit_1.5-9.12          
 [250] jsonlite_2.0.0            GetoptLong_1.0.5         </code></pre>
@@ -1853,7 +2202,7 @@ Session information
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.4.0 (2024-04-24)
 Platform: x86_64-apple-darwin20
-Running under: macOS Ventura 13.7.5
+Running under: macOS Ventura 13.7.6
 
 Matrix products: default
 BLAS:   /Library/Frameworks/R.framework/Versions/4.4-x86_64/Resources/lib/libRblas.0.dylib 
@@ -1873,7 +2222,7 @@ other attached packages:
  [4] RColorBrewer_1.1-3          slingshot_2.12.0            TrajectoryUtils_1.12.0     
  [7] princurve_2.1.6             NCmisc_1.2.0                VennDiagram_1.7.3          
 [10] futile.logger_1.4.3         ggupset_0.4.1               gridExtra_2.3              
-[13] DOSE_3.30.5                 enrichplot_1.24.4           msigdbr_10.0.2             
+[13] DOSE_3.30.5                 enrichplot_1.24.4           msigdbr_24.1.0             
 [16] org.Hs.eg.db_3.19.1         AnnotationDbi_1.66.0        clusterProfiler_4.12.6     
 [19] multtest_2.60.0             metap_1.12                  scater_1.32.1              
 [22] scuttle_1.14.0              destiny_3.18.0              circlize_0.4.16            
@@ -1884,7 +2233,7 @@ other attached packages:
 [37] SingleCellExperiment_1.26.0 SummarizedExperiment_1.34.0 Biobase_2.64.0             
 [40] GenomicRanges_1.56.2        GenomeInfoDb_1.40.1         IRanges_2.38.1             
 [43] S4Vectors_0.42.1            BiocGenerics_0.50.0         MatrixGenerics_1.16.0      
-[46] matrixStats_1.5.0           pheatmap_1.0.12             ggpubr_0.6.0               
+[46] matrixStats_1.5.0           pheatmap_1.0.13             ggpubr_0.6.0               
 [49] ggplot2_3.5.2               Seurat_5.3.0                SeuratObject_5.1.0         
 [52] sp_2.2-0                    runSeurat3_0.1.0            ExploreSCdataSeurat3_0.1.0 
 
@@ -1897,7 +2246,7 @@ loaded via a namespace (and not attached):
  [16] png_0.1-8                 plotrix_3.8-4             cli_3.6.5                
  [19] ggplotify_0.1.2           goftest_1.2-3             VIM_6.2.2                
  [22] variancePartition_1.34.0  BiocNeighbors_1.22.0      shadowtext_0.1.4         
- [25] uwot_0.2.3                curl_6.2.2                tidytree_0.4.6           
+ [25] uwot_0.2.3                curl_6.2.3                tidytree_0.4.6           
  [28] mime_0.13                 evaluate_1.0.3            ComplexHeatmap_2.20.0    
  [31] stringi_1.8.7             backports_1.5.0           lmerTest_3.1-3           
  [34] qqconf_1.3.2              httpuv_1.6.16             rappdirs_0.3.3           
@@ -1914,7 +2263,7 @@ loaded via a namespace (and not attached):
  [67] knitr_1.50                ggplot.multistats_1.0.1   UCSC.utils_1.0.0         
  [70] RhpcBLASctl_0.23-42       timechange_0.3.0          foreach_1.5.2            
  [73] patchwork_1.3.0           caTools_1.18.3            ggtree_3.12.0            
- [76] data.table_1.17.2         R.oo_1.27.1               RSpectra_0.16-2          
+ [76] data.table_1.17.4         R.oo_1.27.1               RSpectra_0.16-2          
  [79] irlba_2.3.5.1             gridGraphics_0.5-1        fastDummies_1.7.5        
  [82] lazyeval_0.2.2            yaml_2.3.10               survival_3.8-3           
  [85] scattermore_1.2           crayon_1.5.3              RcppAnnoy_0.0.22         
@@ -1933,43 +2282,43 @@ loaded via a namespace (and not attached):
 [124] farver_2.1.2              tzdb_0.5.0                remaCor_0.0.18           
 [127] reshape2_1.4.4            yulab.utils_0.2.0         glue_1.8.0               
 [130] cachem_1.1.0              polyclip_1.10-7           generics_0.1.4           
-[133] Biostrings_2.72.1         mvtnorm_1.3-3             parallelly_1.44.0        
-[136] mnormt_2.1.1              statmod_1.5.0             RcppHNSW_0.6.0           
-[139] ScaledMatrix_1.12.0       carData_3.0-5             minqa_1.2.8              
-[142] pbapply_1.7-2             httr2_1.1.2               spam_2.11-1              
-[145] gson_0.1.0                graphlayouts_1.2.2        gtools_3.9.5             
-[148] ggsignif_0.6.4            RcppEigen_0.3.4.0.2       shiny_1.10.0             
-[151] GenomeInfoDbData_1.2.12   glmmTMB_1.1.11            R.utils_2.13.0           
-[154] memoise_2.0.1             rmarkdown_2.29            scales_1.4.0             
-[157] R.methodsS3_1.8.2         future_1.49.0             RANN_2.6.2               
-[160] Cairo_1.6-2               spatstat.data_3.1-6       rstudioapi_0.17.1        
-[163] cluster_2.1.8.1           whisker_0.4.1             mutoss_0.1-13            
-[166] spatstat.utils_3.1-3      hms_1.1.3                 fitdistrplus_1.2-2       
-[169] cowplot_1.1.3             colorspace_2.1-1          rlang_1.1.6              
-[172] DelayedMatrixStats_1.26.0 sparseMatrixStats_1.16.0  xts_0.14.1               
-[175] dotCall64_1.2             shinydashboard_0.7.3      ggforce_0.4.2            
-[178] laeken_0.5.3              mgcv_1.9-3                xfun_0.52                
-[181] e1071_1.7-16              TH.data_1.1-3             iterators_1.0.14         
-[184] abind_1.4-8               GOSemSim_2.30.2           treeio_1.28.0            
-[187] futile.options_1.0.1      bitops_1.0-9              Rdpack_2.6.4             
-[190] promises_1.3.2            scatterpie_0.2.4          RSQLite_2.3.11           
-[193] qvalue_2.36.0             sandwich_3.1-1            fgsea_1.30.0             
-[196] DelayedArray_0.30.1       proxy_0.4-27              GO.db_3.19.1             
-[199] compiler_4.4.0            prettyunits_1.2.0         boot_1.3-31              
-[202] beachmat_2.20.0           listenv_0.9.1             Rcpp_1.0.14              
-[205] edgeR_4.2.2               workflowr_1.7.1           BiocSingular_1.20.0      
-[208] tensor_1.5                MASS_7.3-65               progress_1.2.3           
-[211] BiocParallel_1.38.0       babelgene_22.9            spatstat.random_3.3-3    
-[214] R6_2.6.1                  fastmap_1.2.0             multcomp_1.4-28          
-[217] fastmatch_1.1-6           rstatix_0.7.2             vipor_0.4.7              
-[220] TTR_0.24.4                ROCR_1.0-11               TFisher_0.2.0            
-[223] rsvd_1.0.5                vcd_1.4-13                nnet_7.3-20              
-[226] gtable_0.3.6              KernSmooth_2.23-26        miniUI_0.1.2             
-[229] deldir_2.0-4              htmltools_0.5.8.1         ggthemes_5.1.0           
-[232] bit64_4.6.0-1             spatstat.explore_3.4-2    lifecycle_1.0.4          
-[235] blme_1.0-6                msigdbdf_24.1.1           nloptr_2.2.1             
+[133] Biostrings_2.72.1         mvtnorm_1.3-3             presto_1.0.0             
+[136] parallelly_1.45.0         mnormt_2.1.1              statmod_1.5.0            
+[139] RcppHNSW_0.6.0            ScaledMatrix_1.12.0       carData_3.0-5            
+[142] minqa_1.2.8               pbapply_1.7-2             httr2_1.1.2              
+[145] spam_2.11-1               gson_0.1.0                graphlayouts_1.2.2       
+[148] gtools_3.9.5              ggsignif_0.6.4            RcppEigen_0.3.4.0.2      
+[151] shiny_1.10.0              GenomeInfoDbData_1.2.12   glmmTMB_1.1.11           
+[154] R.utils_2.13.0            memoise_2.0.1             rmarkdown_2.29           
+[157] scales_1.4.0              R.methodsS3_1.8.2         future_1.58.0            
+[160] RANN_2.6.2                Cairo_1.6-2               spatstat.data_3.1-6      
+[163] rstudioapi_0.17.1         cluster_2.1.8.1           whisker_0.4.1            
+[166] mutoss_0.1-13             spatstat.utils_3.1-4      hms_1.1.3                
+[169] fitdistrplus_1.2-2        cowplot_1.1.3             colorspace_2.1-1         
+[172] rlang_1.1.6               DelayedMatrixStats_1.26.0 sparseMatrixStats_1.16.0 
+[175] xts_0.14.1                dotCall64_1.2             shinydashboard_0.7.3     
+[178] ggforce_0.4.2             laeken_0.5.3              mgcv_1.9-3               
+[181] xfun_0.52                 e1071_1.7-16              TH.data_1.1-3            
+[184] iterators_1.0.14          abind_1.4-8               GOSemSim_2.30.2          
+[187] treeio_1.28.0             futile.options_1.0.1      bitops_1.0-9             
+[190] Rdpack_2.6.4              promises_1.3.3            scatterpie_0.2.4         
+[193] RSQLite_2.4.0             qvalue_2.36.0             sandwich_3.1-1           
+[196] fgsea_1.30.0              DelayedArray_0.30.1       proxy_0.4-27             
+[199] GO.db_3.19.1              compiler_4.4.0            prettyunits_1.2.0        
+[202] boot_1.3-31               beachmat_2.20.0           listenv_0.9.1            
+[205] Rcpp_1.0.14               edgeR_4.2.2               workflowr_1.7.1          
+[208] BiocSingular_1.20.0       tensor_1.5                MASS_7.3-65              
+[211] progress_1.2.3            BiocParallel_1.38.0       babelgene_22.9           
+[214] spatstat.random_3.4-1     R6_2.6.1                  fastmap_1.2.0            
+[217] multcomp_1.4-28           fastmatch_1.1-6           rstatix_0.7.2            
+[220] vipor_0.4.7               TTR_0.24.4                ROCR_1.0-11              
+[223] TFisher_0.2.0             rsvd_1.0.5                vcd_1.4-13               
+[226] nnet_7.3-20               gtable_0.3.6              KernSmooth_2.23-26       
+[229] miniUI_0.1.2              deldir_2.0-4              htmltools_0.5.8.1        
+[232] ggthemes_5.1.0            bit64_4.6.0-1             spatstat.explore_3.4-3   
+[235] lifecycle_1.0.4           blme_1.0-6                nloptr_2.2.1             
 [238] sass_0.4.10               vctrs_0.6.5               robustbase_0.99-4-1      
-[241] spatstat.geom_3.3-6       sn_2.1.1                  ggfun_0.1.8              
+[241] spatstat.geom_3.4-1       sn_2.1.1                  ggfun_0.1.8              
 [244] future.apply_1.11.3       bslib_0.9.0               pillar_1.10.2            
 [247] gplots_3.2.0              pcaMethods_1.96.0         locfit_1.5-9.12          
 [250] jsonlite_2.0.0            GetoptLong_1.0.5         </code></pre>

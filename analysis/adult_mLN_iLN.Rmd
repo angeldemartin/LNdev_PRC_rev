@@ -106,6 +106,7 @@ DimPlot(seurat, reduction = "umap", group.by = "label", cols = colLab)+
   xlab("UMAP1") +
   ylab("UMAP2")
 ```
+
 ## rel abundances
 ### rel abundance for each dataset
 ```{r abundance dataset, fig.height=10, fig.width=5}
@@ -201,6 +202,320 @@ createClusterPlot <- function(cluster) {
     stat_compare_means(method = "wilcox.test", label.y = 0.0)
 }
 lapply(clusterVec, createClusterPlot)
+```
+
+## DE genes iLN vs mLN
+### DE genes iLN vs mLN top100
+```{r}
+Idents(seurat) <- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels <- unique(seurat$label)
+DEGenes_by_label <- list()
+
+for (lbl in unique_labels) {
+  message("Processing label: ", lbl)
+  
+# Subset Seurat object for this label
+seurat_sub <- subset(seurat, label == lbl)
+
+markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
+  filter(p_val_adj < 0.1) %>%
+  top_n(100, avg_log2FC) %>%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] <- markers
+} 
+
+all_DEGenes <- bind_rows(DEGenes_by_label)
+
+ordX <- c("FDC/MRC", "TRC", "TBRC", "MedRC/IFRC", "MedRC" , "actMedRC",
+                   "PRC", "Pi16+RC", "VSMC")
+
+all_DEGenes$label <- factor(all_DEGenes$label, levels = ordX)
+```
+
+### distribution of logFC of top 100 DE genes iLN vs mLN
+```{r top100 DE iLN vs mLN}
+ggdensity(all_DEGenes, x = "avg_log2FC", add= "median", rug = TRUE, color = "label", fill = "label", palette = colLab)
+
+ggviolin(all_DEGenes, x = "label", y = "avg_log2FC", fill = "label", palette = colLab, add = "median_iqr")
+
+ggboxplot(all_DEGenes, x = "label", y = "avg_log2FC", color = "label", palette = colLab ,add = "jitter")
+```
+
+### DE genes iLN vs mLN top200
+```{r}
+Idents(seurat) <- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels <- unique(seurat$label)
+DEGenes_by_label <- list()
+
+for (lbl in unique_labels) {
+  message("Processing label: ", lbl)
+  
+# Subset Seurat object for this label
+seurat_sub <- subset(seurat, label == lbl)
+
+markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
+  filter(p_val_adj < 0.1) %>%
+  top_n(200, avg_log2FC) %>%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] <- markers
+} 
+
+all_DEGenes <- bind_rows(DEGenes_by_label)
+
+ordX <- c("FDC/MRC", "TRC", "TBRC", "MedRC/IFRC", "MedRC" , "actMedRC",
+                   "PRC", "Pi16+RC", "VSMC")
+
+all_DEGenes$label <- factor(all_DEGenes$label, levels = ordX)
+```
+
+### distribution of logFC of top 200 DE genes iLN vs mLN
+```{r top200 DE iLN vs mLN}
+ggdensity(all_DEGenes, x = "avg_log2FC", add= "median", rug = TRUE, color = "label", fill = "label", palette = colLab)
+
+ggviolin(all_DEGenes, x = "label", y = "avg_log2FC", fill = "label", palette = colLab, add = "median_iqr")
+
+ggboxplot(all_DEGenes, x = "label", y = "avg_log2FC", color = "label", palette = colLab ,add = "jitter")
+```
+
+### DE genes iLN vs mLN top100 up in iLN
+```{r}
+Idents(seurat) <- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels <- unique(seurat$label)
+DEGenes_by_label <- list()
+
+for (lbl in unique_labels) {
+  message("Processing label: ", lbl)
+  
+# Subset Seurat object for this label
+seurat_sub <- subset(seurat, label == lbl)
+
+markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
+  filter(cluster == "iLN") %>%
+  filter(p_val_adj < 0.1) %>%
+  top_n(100, avg_log2FC) %>%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] <- markers
+} 
+
+all_DEGenes <- bind_rows(DEGenes_by_label)
+
+ordX <- c("FDC/MRC", "TRC", "TBRC", "MedRC/IFRC", "MedRC" , "actMedRC",
+                   "PRC", "Pi16+RC", "VSMC")
+
+all_DEGenes$label <- factor(all_DEGenes$label, levels = ordX)
+```
+
+### distribution of logFC of top 100 up in iLN
+```{r top100 up in iLN}
+ggdensity(all_DEGenes, x = "avg_log2FC", add= "median", rug = TRUE, color = "label", fill = "label", palette = colLab)
+
+ggviolin(all_DEGenes, x = "label", y = "avg_log2FC", fill = "label", palette = colLab, add = "median_iqr")
+
+ggboxplot(all_DEGenes, x = "label", y = "avg_log2FC", color = "label", palette = colLab ,add = "jitter")
+```
+
+### DE genes iLN vs mLN top100 up in mLN
+```{r}
+Idents(seurat) <- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels <- unique(seurat$label)
+DEGenes_by_label <- list()
+
+for (lbl in unique_labels) {
+  message("Processing label: ", lbl)
+  
+# Subset Seurat object for this label
+seurat_sub <- subset(seurat, label == lbl)
+
+markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
+  filter(cluster == "mLN") %>%
+  filter(p_val_adj < 0.1) %>%
+  top_n(100, avg_log2FC) %>%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] <- markers
+} 
+
+all_DEGenes <- bind_rows(DEGenes_by_label)
+
+ordX <- c("FDC/MRC", "TRC", "TBRC", "MedRC/IFRC", "MedRC" , "actMedRC",
+                   "PRC", "Pi16+RC", "VSMC")
+
+all_DEGenes$label <- factor(all_DEGenes$label, levels = ordX)
+```
+
+### distribution of logFC of top 100 up in mLN
+```{r top100 up in mLN}
+ggdensity(all_DEGenes, x = "avg_log2FC", add= "median", rug = TRUE, color = "label", fill = "label", palette = colLab)
+
+ggviolin(all_DEGenes, x = "label", y = "avg_log2FC", fill = "label", palette = colLab, add = "median_iqr")
+
+ggboxplot(all_DEGenes, x = "label", y = "avg_log2FC", color = "label", palette = colLab ,add = "jitter")
+```
+
+## now top 100 based on p_val_adj
+### DE genes iLN vs mLN top100
+```{r}
+Idents(seurat) <- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels <- unique(seurat$label)
+DEGenes_by_label <- list()
+
+for (lbl in unique_labels) {
+  message("Processing label: ", lbl)
+  
+# Subset Seurat object for this label
+seurat_sub <- subset(seurat, label == lbl)
+
+markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
+  filter(p_val_adj < 0.1) %>%
+  top_n(100, -(p_val_adj)) %>%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] <- markers
+} 
+
+all_DEGenes <- bind_rows(DEGenes_by_label)
+
+ordX <- c("FDC/MRC", "TRC", "TBRC", "MedRC/IFRC", "MedRC" , "actMedRC",
+                   "PRC", "Pi16+RC", "VSMC")
+
+all_DEGenes$label <- factor(all_DEGenes$label, levels = ordX)
+```
+
+### distribution of logFC of top 100 DE genes iLN vs mLN
+```{r top100 DE iLN vs mLN based on p_val_adj}
+ggdensity(all_DEGenes, x = "avg_log2FC", add= "median", rug = TRUE, color = "label", fill = "label", palette = colLab)
+
+ggviolin(all_DEGenes, x = "label", y = "avg_log2FC", fill = "label", palette = colLab, add = "median_iqr")
+
+ggboxplot(all_DEGenes, x = "label", y = "avg_log2FC", color = "label", palette = colLab ,add = "jitter")
+```
+
+### DE genes iLN vs mLN top200
+```{r}
+Idents(seurat) <- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels <- unique(seurat$label)
+DEGenes_by_label <- list()
+
+for (lbl in unique_labels) {
+  message("Processing label: ", lbl)
+  
+# Subset Seurat object for this label
+seurat_sub <- subset(seurat, label == lbl)
+
+markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
+  filter(p_val_adj < 0.1) %>%
+  top_n(200, -(p_val_adj)) %>%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] <- markers
+} 
+
+all_DEGenes <- bind_rows(DEGenes_by_label)
+
+ordX <- c("FDC/MRC", "TRC", "TBRC", "MedRC/IFRC", "MedRC" , "actMedRC",
+                   "PRC", "Pi16+RC", "VSMC")
+
+all_DEGenes$label <- factor(all_DEGenes$label, levels = ordX)
+```
+
+### distribution of logFC of top 200 DE genes iLN vs mLN
+```{r top200 DE iLN vs mLN based on p_val_adj}
+ggdensity(all_DEGenes, x = "avg_log2FC", add= "median", rug = TRUE, color = "label", fill = "label", palette = colLab)
+
+ggviolin(all_DEGenes, x = "label", y = "avg_log2FC", fill = "label", palette = colLab, add = "median_iqr")
+
+ggboxplot(all_DEGenes, x = "label", y = "avg_log2FC", color = "label", palette = colLab ,add = "jitter")
+```
+
+
+
+
+
+### DE genes iLN vs mLN top100 up in iLN
+```{r}
+Idents(seurat) <- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels <- unique(seurat$label)
+DEGenes_by_label <- list()
+
+for (lbl in unique_labels) {
+  message("Processing label: ", lbl)
+  
+# Subset Seurat object for this label
+seurat_sub <- subset(seurat, label == lbl)
+
+markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
+  filter(cluster == "iLN") %>%
+  filter(p_val_adj < 0.1) %>%
+  top_n(100, -(p_val_adj)) %>%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] <- markers
+} 
+
+all_DEGenes <- bind_rows(DEGenes_by_label)
+
+ordX <- c("FDC/MRC", "TRC", "TBRC", "MedRC/IFRC", "MedRC" , "actMedRC",
+                   "PRC", "Pi16+RC", "VSMC")
+
+all_DEGenes$label <- factor(all_DEGenes$label, levels = ordX)
+```
+
+### distribution of logFC of top 100 up in iLN
+```{r top100 up in iLN - based on p_val_adj}
+ggdensity(all_DEGenes, x = "avg_log2FC", add= "median", rug = TRUE, color = "label", fill = "label", palette = colLab)
+
+ggviolin(all_DEGenes, x = "label", y = "avg_log2FC", fill = "label", palette = colLab, add = "median_iqr")
+
+ggboxplot(all_DEGenes, x = "label", y = "avg_log2FC", color = "label", palette = colLab ,add = "jitter")
+```
+
+### DE genes iLN vs mLN top100 up in mLN
+```{r}
+Idents(seurat) <- seurat$location
+## DE genes for each label according to iLN vs mLN
+unique_labels <- unique(seurat$label)
+DEGenes_by_label <- list()
+
+for (lbl in unique_labels) {
+  message("Processing label: ", lbl)
+  
+# Subset Seurat object for this label
+seurat_sub <- subset(seurat, label == lbl)
+
+markers <- FindAllMarkers(seurat_sub, logfc.threshold = 0.1, only.pos = TRUE) %>%
+  filter(cluster == "mLN") %>%
+  filter(p_val_adj < 0.1) %>%
+  top_n(100, -(p_val_adj)) %>%
+  mutate(label = lbl)
+
+  DEGenes_by_label[[lbl]] <- markers
+} 
+
+all_DEGenes <- bind_rows(DEGenes_by_label)
+
+ordX <- c("FDC/MRC", "TRC", "TBRC", "MedRC/IFRC", "MedRC" , "actMedRC",
+                   "PRC", "Pi16+RC", "VSMC")
+
+all_DEGenes$label <- factor(all_DEGenes$label, levels = ordX)
+```
+
+### distribution of logFC of top 100 up in mLN
+```{r top100 up in mLN - based on p_val_adj}
+ggdensity(all_DEGenes, x = "avg_log2FC", add= "median", rug = TRUE, color = "label", fill = "label", palette = colLab)
+
+ggviolin(all_DEGenes, x = "label", y = "avg_log2FC", fill = "label", palette = colLab, add = "median_iqr")
+
+ggboxplot(all_DEGenes, x = "label", y = "avg_log2FC", color = "label", palette = colLab ,add = "jitter")
 ```
 
 ## session info
