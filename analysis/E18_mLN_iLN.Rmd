@@ -249,6 +249,12 @@ fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18fil_int
 seuratE18fil.int <- readRDS(fileNam)
 ```
 
+### counts
+```{r counts}
+table(seuratE18fil.int$orig.ident)
+table(seuratE18fil.int$EYFP)
+```
+
 
 ```{r set default assay int object}
 DefaultAssay(object = seuratE18fil.int) <- "RNA"
@@ -363,7 +369,7 @@ write.table(markerGenes_int,
 genes <- data.frame(gene=rownames(seuratE18fil.int)) %>% 
     mutate(geneID=gsub("^.*\\.", "", gene)) 
 
-selGenes <- data.frame(geneID=c("Ptprc", "Msln", "Mki67", "Kcnn3", "Tcf21", "Pecam1", "Lyve1", "Ccl21a", "Icam1", "Cd34", "Rosa26eyfp", "Krt19", "Acta2","Myh11", "Cxcl13", "Epcam", "Adipoq")) %>% 
+selGenes <- data.frame(geneID=c("Ptprc", "Msln", "Mki67", "Kcnn3", "Tcf21", "Pecam1", "Lyve1", "Ccl21a", "Icam1", "Cd34", "Rosa26eyfp", "Krt19", "Acta2","Myh11", "Cxcl13", "Epcam", "Adipoq", "Col1a2", "Col1a1")) %>% 
   left_join(., genes, by = "geneID") 
 
 pList <- sapply(selGenes$gene, function(x){
