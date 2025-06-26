@@ -382,7 +382,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2025-06-17
+<strong>Last updated:</strong> 2025-06-26
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -542,15 +542,15 @@ data/WT_adultOnly_bothLabeled_integrated__seurat.rds
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtree1b6fb6093c61781a87426c180eaff86d35ca3923targetblank1b6fb60a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtreeaad7067cd6b9436184e68320f9f64972425f828ctargetblankaad7067a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/1b6fb6093c61781a87426c180eaff86d35ca3923" target="_blank">1b6fb60</a>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/aad7067cd6b9436184e68320f9f64972425f828c" target="_blank">aad7067</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtree1b6fb6093c61781a87426c180eaff86d35ca3923targetblank1b6fb60a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomangeldemartinLNdevPRCrevtreeaad7067cd6b9436184e68320f9f64972425f828ctargetblankaad7067a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -560,7 +560,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/1b6fb6093c61781a87426c180eaff86d35ca3923" target="_blank">1b6fb60</a>.
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/tree/aad7067cd6b9436184e68320f9f64972425f828c" target="_blank">aad7067</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -579,6 +579,7 @@ Ignored files:
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
     Ignored:    analysis/.DS_Store
+    Ignored:    analysis/figure/
 
 Unstaged changes:
     Modified:   analysis/adult_mLN_iLN.Rmd
@@ -626,6 +627,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/analysis/adult_mLN_iLN.Rmd" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+<td>
+june17.2
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/angeldemartin/LNdev_PRC_rev/aad7067cd6b9436184e68320f9f64972425f828c/docs/adult_mLN_iLN.html" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+<td>
+june17.2
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -865,6 +900,51 @@ angeldemartin
 </div>
 </div>
 </div>
+</div>
+<div id="dotplot-sel-genes" class="section level2">
+<h2>dotplot sel genes</h2>
+<pre class="r"><code>seurat_markers &lt;- data.frame(gene=c(&quot;Cxcl13&quot;,&quot;Ccl19&quot;,&quot;Grem1&quot;, &quot;Grem2&quot;, &quot;Bmp4&quot;, &quot;Bmp2&quot;, &quot;Bmpr2&quot;, &quot;Bmpr1a&quot;))
+
+genes &lt;- data.frame(geneID=rownames(seurat)) %&gt;%
+  mutate(gene=gsub(&quot;.*\\.&quot;, &quot;&quot;,  geneID)) 
+
+markerAll &lt;- seurat_markers %&gt;% left_join(., genes, by=&quot;gene&quot;)</code></pre>
+<pre class="r"><code>Idents(seurat) &lt;- seurat$label
+DotPlot(seurat, assay=&quot;RNA&quot;, features = rev(markerAll$geneID), scale =T,
+        cluster.idents = F) +
+  scale_color_viridis_c() +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_x_discrete(breaks=rev(markerAll$geneID), labels=rev(markerAll$gene)) +
+  xlab(&quot;&quot;) + ylab(&quot;&quot;)</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>genes &lt;- data.frame(gene=rownames(seurat)) %&gt;% 
+    mutate(geneID=gsub(&quot;^.*\\.&quot;, &quot;&quot;, gene)) 
+
+selGenes &lt;- data.frame(geneID=c(&quot;Cxcl13&quot;,&quot;Ccl19&quot;,&quot;Grem1&quot;, &quot;Grem2&quot;, &quot;Bmp4&quot;, &quot;Bmp2&quot;, &quot;Bmpr2&quot;, &quot;Bmpr1a&quot;)) %&gt;% 
+  left_join(., genes, by = &quot;geneID&quot;) 
+
+pList &lt;- sapply(selGenes$gene, function(x){
+  p &lt;- FeaturePlot(seurat, reduction = &quot;umap&quot;, 
+            features = x, 
+            cols=c(&quot;lightgrey&quot;,&quot;darkred&quot;),
+            order = T)+
+  theme(legend.position=&quot;right&quot;)
+  plot(p)
+})</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-7-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-7-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-7-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-7-5.png" width="672" style="display: block; margin: auto;" /><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-7-6.png" width="672" style="display: block; margin: auto;" /><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-7-7.png" width="672" style="display: block; margin: auto;" /><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-7-8.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>selGenes &lt;- data.frame(geneID=c(&quot;Cxcl13&quot;,&quot;Ccl19&quot;,&quot;Grem1&quot;, &quot;Grem2&quot;, &quot;Bmp4&quot;, &quot;Bmp2&quot;, &quot;Bmpr2&quot;, &quot;Bmpr1a&quot;)) %&gt;% 
+  left_join(., genes, by = &quot;geneID&quot;) 
+
+pList &lt;- sapply(selGenes$gene, function(x){
+  p &lt;- FeaturePlot(seurat, reduction = &quot;umap&quot;, 
+            features = x, 
+            cols=c(&quot;lightgrey&quot;,&quot;darkred&quot;),
+            order = F)+
+  theme(legend.position=&quot;right&quot;)
+  plot(p)
+})</code></pre>
+<p><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-8-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-8-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-8-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-8-5.png" width="672" style="display: block; margin: auto;" /><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-8-6.png" width="672" style="display: block; margin: auto;" /><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-8-7.png" width="672" style="display: block; margin: auto;" /><img src="figure/adult_mLN_iLN.Rmd/unnamed-chunk-8-8.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="rel-abundances" class="section level2">
 <h2>rel abundances</h2>
@@ -1842,6 +1922,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top100 DE iLN vs mLN-1.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 DE iLN vs mLN-1.png" target="_blank">1b6fb60</a>
 </td>
 <td>
@@ -1881,6 +1972,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top100 DE iLN vs mLN-2.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 DE iLN vs mLN-2.png" target="_blank">1b6fb60</a>
 </td>
 <td>
@@ -1918,6 +2020,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top100 DE iLN vs mLN-3.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 DE iLN vs mLN-3.png" target="_blank">1b6fb60</a>
@@ -1991,6 +2104,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN-1.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN-1.png" target="_blank">1b6fb60</a>
 </td>
 <td>
@@ -2030,6 +2154,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN-2.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN-2.png" target="_blank">1b6fb60</a>
 </td>
 <td>
@@ -2067,6 +2202,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN-3.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN-3.png" target="_blank">1b6fb60</a>
@@ -2141,6 +2287,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN-1.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN-1.png" target="_blank">1b6fb60</a>
 </td>
 <td>
@@ -2180,6 +2337,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN-2.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN-2.png" target="_blank">1b6fb60</a>
 </td>
 <td>
@@ -2217,6 +2385,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN-3.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN-3.png" target="_blank">1b6fb60</a>
@@ -2291,6 +2470,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN-1.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN-1.png" target="_blank">1b6fb60</a>
 </td>
 <td>
@@ -2330,6 +2520,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN-2.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN-2.png" target="_blank">1b6fb60</a>
 </td>
 <td>
@@ -2367,6 +2568,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN-3.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN-3.png" target="_blank">1b6fb60</a>
@@ -2596,6 +2808,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN based on p_val_adj-1.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN based on p_val_adj-1.png" target="_blank">1b6fb60</a>
 </td>
 <td>
@@ -2636,6 +2859,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN based on p_val_adj-2.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN based on p_val_adj-2.png" target="_blank">1b6fb60</a>
 </td>
 <td>
@@ -2674,6 +2908,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN based on p_val_adj-3.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top200 DE iLN vs mLN based on p_val_adj-3.png" target="_blank">1b6fb60</a>
@@ -2749,6 +2994,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN - based on p_val_adj-1.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN - based on p_val_adj-1.png" target="_blank">1b6fb60</a>
 </td>
 <td>
@@ -2789,6 +3045,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN - based on p_val_adj-2.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN - based on p_val_adj-2.png" target="_blank">1b6fb60</a>
 </td>
 <td>
@@ -2827,6 +3094,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN - based on p_val_adj-3.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in iLN - based on p_val_adj-3.png" target="_blank">1b6fb60</a>
@@ -2902,6 +3180,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN - based on p_val_adj-1.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN - based on p_val_adj-1.png" target="_blank">1b6fb60</a>
 </td>
 <td>
@@ -2940,6 +3229,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN - based on p_val_adj-2.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN - based on p_val_adj-2.png" target="_blank">1b6fb60</a>
@@ -2982,6 +3282,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/aad7067cd6b9436184e68320f9f64972425f828c/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN - based on p_val_adj-3.png" target="_blank">aad7067</a>
+</td>
+<td>
+angeldemartin
+</td>
+<td>
+2025-06-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/angeldemartin/LNdev_PRC_rev/blob/1b6fb6093c61781a87426c180eaff86d35ca3923/docs/figure/adult_mLN_iLN.Rmd/top100 up in mLN - based on p_val_adj-3.png" target="_blank">1b6fb60</a>
 </td>
 <td>
@@ -3000,7 +3311,7 @@ angeldemartin
 <div id="session-info" class="section level2">
 <h2>session info</h2>
 <pre class="r"><code>date()</code></pre>
-<pre><code>[1] &quot;Tue Jun 17 15:48:45 2025&quot;</code></pre>
+<pre><code>[1] &quot;Thu Jun 26 13:08:16 2025&quot;</code></pre>
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.4.0 (2024-04-24)
 Platform: x86_64-apple-darwin20
