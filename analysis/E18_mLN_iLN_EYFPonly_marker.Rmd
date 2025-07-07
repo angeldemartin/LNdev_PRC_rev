@@ -44,6 +44,7 @@ library(gridExtra)
 library(ggupset)
 library(VennDiagram)
 library(NCmisc)
+library(slingshot)
 ```
 
 ### set color vectors 
@@ -101,7 +102,7 @@ DimPlot(seuratE18EYFPv2.int, reduction = "umap", group.by = "location", cols = c
 ```{r umap int label v2}
 colLab <- c("#900C3F","#b66e8d", "#003C67FF",
             "#e3953d", "#714542", "#b6856e","grey")
-names(colLab) <- c("mLTo1", "mLTo2", "mLTo3", "mLTo4", "Adipoc", "Mesothelial", "Prolif")
+names(colLab) <- c("cluster1", "cluster2", "cluster3", "cluster4", "Adipoc", "Mesothelial", "Prolif")
 
 DimPlot(seuratE18EYFPv2.int, reduction = "umap", group.by = "label", cols = colLab)+
   theme_bw() +
@@ -359,26 +360,21 @@ DimPlot(seuratE18EYFPv2.int, reduction = "umap", group.by = "location", cols = c
 ### assign label
 ```{r assign label int clusters v2 mLTo only}
 seuratE18EYFPv2.int$label <- "label"
-seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "0")] <- "mLTo1"
-seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "1")] <- "mLTo2"
-seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "2")] <- "mLTo3"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "0")] <- "cluster2"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "1")] <- "cluster3"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "2")] <- "cluster1"
 
 table(seuratE18EYFPv2.int$label)
 ##order
-seuratE18EYFPv2.int$label <- factor(seuratE18EYFPv2.int$label, levels = c("mLTo1", "mLTo2", "mLTo3"))
+seuratE18EYFPv2.int$label <- factor(seuratE18EYFPv2.int$label, levels = c("cluster2", "cluster3", "cluster1"))
 table(seuratE18EYFPv2.int$label)
 
 colLab <- c("#900C3F","#b66e8d", "#003C67FF")
-
-names(colLab) <- c("mLTo1", "mLTo2", "mLTo3")
+names(colLab) <- c("cluster2", "cluster3", "cluster1")
 ```
 
 ### label
 ```{r umap int label v2 mLTo only}
-colLab <- c("#900C3F","#b66e8d", "#003C67FF",
-            "#e3953d", "#714542", "#b6856e", "lightblue","grey", "black")
-names(colLab) <- c("mLTo1", "mLTo2", "mLTo3", "mLTo4", "mLTo5")
-
 DimPlot(seuratE18EYFPv2.int, reduction = "umap", group.by = "label", cols = colLab)+
   theme_bw() +
   theme(axis.text = element_blank(), axis.ticks = element_blank(), 
@@ -401,7 +397,7 @@ DimPlot(seuratE18EYFPv2.int, reduction = "umap", group.by = "label", pt.size=0.5
 seurat_markers <- data.frame(gene=c("Vcam1", "Icam1",
                                     "Cxcl13", "Ccl19", "Ccl21a","Tnfsf11", "Grem1","Ifitm1","Cxcl1","Ifitm3","Ccl2","Nfkbia","Des",
                                     "Mfap5","Cdkn1c","Akap12","Anxa2","Lox","Gsn","Basp1","Fndc1","Sparc","Col1a1","Fbn2","Nr4a1","Fbln1","Cd34","Pi16",
-                                    "Fbln5","Tm4sf1", "Ntrk3", "Fhl1", "Rgs7bp", "Adamts2", "Mpped2", "Ramp1", "Pdgfrl", "Eln", "Hspb2","Mgp", "Actg2","Acta2", "Myh11", "Mcam", "Mki67"))
+                                    "Fbln5","Tm4sf1", "Ntrk3", "Fhl1", "Rgs7bp", "Adamts2", "Mpped2", "Ramp1", "Pdgfrl", "Eln", "Hspb2","Mgp", "Actg2","Acta2", "Myh11", "Mcam", "Mki67", "Ccna2", "Cdca8", "Prc1", "Aurkb"))
 
 genes <- data.frame(geneID=rownames(seuratE18EYFPv2.int)) %>%
   mutate(gene=gsub(".*\\.", "",  geneID)) 
@@ -513,6 +509,46 @@ plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
 ```
 
+### plot signature 3/4 combined
+```{r}
+selGenes <- data.frame(gene=c("Fbln5","Eln","Actg2","Acta2","Myh11","Mfap5","Gsn","Fndc1","Col1a1","Cd34"))
+signGenes <- genes %>% dplyr::filter(gene %in% selGenes$gene)
+
+##make a count matrix of signature genes
+sceSub <- sce[which(rownames(sce) %in% signGenes$geneID),]
+cntMat <- rowSums(t(as.matrix(
+    sceSub@assays@data$logcounts)))/nrow(signGenes)
+sceSub$sign <- cntMat
+sceSub$sign2 <- sceSub$sign
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 2.5))
+sceSub$sign2[which(sceSub$sign > 2.5)] <- 2.5
+##check max and min values
+max(sceSub$sign)
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
+  theme(legend.position = "none")
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+### plot signature 3/4 combined 5selected
+```{r}
+selGenes <- data.frame(gene=c("Eln","Mfap5","Gsn","Fndc1","Cd34"))
+signGenes <- genes %>% dplyr::filter(gene %in% selGenes$gene)
+
+##make a count matrix of signature genes
+sceSub <- sce[which(rownames(sce) %in% signGenes$geneID),]
+cntMat <- rowSums(t(as.matrix(
+    sceSub@assays@data$logcounts)))/nrow(signGenes)
+sceSub$sign <- cntMat
+sceSub$sign2 <- sceSub$sign
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 2))
+sceSub$sign2[which(sceSub$sign > 2)] <- 2
+##check max and min values
+max(sceSub$sign)
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
+  theme(legend.position = "none")
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
 ### splenic mLTo signature (Cheng et al, Nat Commun. 2019 - Supplementary Figure 4C)
 ```{r}
 selGenes <- data.frame(gene=c("Pdgfra", "Pdgfrb", "Kitl", "Cdh11", "Loxl1", "Loxl2", "Cd248", "Nkx3-2", "Gli1", "Aldh1b1"))
@@ -546,6 +582,26 @@ sceSub$sign <- cntMat
 sceSub$sign2 <- sceSub$sign
 sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 1.5))
 sceSub$sign2[which(sceSub$sign > 1.5)] <- 1.5
+##check max and min values
+max(sceSub$sign)
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
+  theme(legend.position = "none")
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+### plot proliferation signature
+```{r}
+selGenes <- data.frame(gene=c("Mki67", "Ccna2", "Cdca8", "Prc1", "Aurkb"))
+signGenes <- genes %>% dplyr::filter(gene %in% selGenes$gene)
+
+##make a count matrix of signature genes
+sceSub <- sce[which(rownames(sce) %in% signGenes$geneID),]
+cntMat <- rowSums(t(as.matrix(
+    sceSub@assays@data$logcounts)))/nrow(signGenes)
+sceSub$sign <- cntMat
+sceSub$sign2 <- sceSub$sign
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 2))
+sceSub$sign2[which(sceSub$sign > 2)] <- 2
 ##check max and min values
 max(sceSub$sign)
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +

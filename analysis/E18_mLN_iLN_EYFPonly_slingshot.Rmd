@@ -1,0 +1,206 @@
+---
+title: "E18_mLN_iLN_EYFPonly_slingshot"
+author: "A.DeMartin"
+date: "2025-07-07"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+options(width = 100)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, dev = c("png", "pdf"))
+seed <- 1234
+```
+
+## load and preprocess
+### load packages
+```{r load packages, warning=FALSE, include=FALSE}
+library(ExploreSCdataSeurat3)
+library(runSeurat3)
+library(Seurat)
+library(ggpubr)
+library(pheatmap)
+library(SingleCellExperiment)
+library(dplyr)
+library(tidyverse)
+library(viridis)
+library(muscat)
+library(circlize)
+library(destiny)
+library(scater)
+library(metap)
+library(multtest)
+library(clusterProfiler)
+library(org.Mm.eg.db)
+library(msigdbr)
+library(enrichplot)
+library(DOSE)
+library(grid)
+library(gridExtra)
+library(ggupset)
+library(VennDiagram)
+library(NCmisc)
+library(slingshot)
+library(RColorBrewer)
+```
+
+### set color vectors 
+```{r set color vector}
+coltimepoint <- c("#440154FF", "#3B528BFF", "#21908CFF", "#5DC863FF")
+names(coltimepoint) <- c("E18", "P7", "3w", "8w")
+
+collocation <- c("#61baba", "#ba6161")
+names(collocation) <- c("iLN", "mLN")
+```
+
+### load object EYFP integrated v2
+```{r}
+fileNam <- "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/E18EYFPv2_integrated_seurat.rds"
+seuratE18EYFPv2.int <- readRDS(fileNam)
+```
+
+```{r set default assay int object v2}
+DefaultAssay(object = seuratE18EYFPv2.int) <- "RNA"
+seuratE18EYFPv2.int$intCluster <- seuratE18EYFPv2.int$integrated_snn_res.0.25
+Idents(seuratE18EYFPv2.int) <- seuratE18EYFPv2.int$intCluster
+
+colPal <- c("#DAF7A6", "#FFC300", "#FF5733", "#C70039", "#900C3F", "#b66e8d",
+            "#61a4ba", "#6178ba", "#54a87f", "#25328a", "#b6856e",
+            "#ba6161", "#20714a", "#0073C2FF", "#EFC000FF", "#868686FF", 
+            "#CD534CFF","#7AA6DCFF", "#003C67FF", "#8F7700FF", "#3B3B3BFF",
+            "#A73030FF", "#4A6990FF")[1:length(unique(seuratE18EYFPv2.int$intCluster))]
+names(colPal) <- unique(seuratE18EYFPv2.int$intCluster)
+```
+
+## dimplot int data v2
+### clustering 
+```{r umap int v2}
+DimPlot(seuratE18EYFPv2.int, reduction = "umap",
+        label = T, shuffle = T, cols = colPal) +
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("umap1") +
+  ylab("umap2")
+```
+
+## subset mLTo and rerun
+```{r}
+table(seuratE18EYFPv2.int$label)
+seuratE18EYFPv2.int <- subset(seuratE18EYFPv2.int, label %in% c("Adipoc", "Mesothelial"), invert = TRUE)
+table(seuratE18EYFPv2.int$label)
+
+## rerun seurat
+DefaultAssay(object = seuratE18EYFPv2.int) <- "integrated"
+seuratE18EYFPv2.int <- ScaleData(object = seuratE18EYFPv2.int, verbose = FALSE,
+                         features = rownames(seuratE18EYFPv2.int))
+seuratE18EYFPv2.int <- RunPCA(object = seuratE18EYFPv2.int, npcs = 20, verbose = FALSE)
+seuratE18EYFPv2.int <- RunTSNE(object = seuratE18EYFPv2.int, recuction = "pca", dims = 1:20)
+seuratE18EYFPv2.int <- RunUMAP(object = seuratE18EYFPv2.int, recuction = "pca", dims = 1:20)
+
+seuratE18EYFPv2.int <- FindNeighbors(object = seuratE18EYFPv2.int, reduction = "pca", dims = 1:20)
+res <- c(0.1, 0.6, 0.8, 0.4, 0.25)
+for (i in 1:length(res)){
+  seuratE18EYFPv2.int <- FindClusters(object = seuratE18EYFPv2.int, resolution = res[i],
+                              random.seed = 1234)
+}
+```
+
+```{r set default assay int object v2 mLto only}
+DefaultAssay(object = seuratE18EYFPv2.int) <- "RNA"
+seuratE18EYFPv2.int$intCluster <- seuratE18EYFPv2.int$integrated_snn_res.0.1
+Idents(seuratE18EYFPv2.int) <- seuratE18EYFPv2.int$intCluster
+
+colPal <- c("#DAF7A6", "#FFC300", "#FF5733", "#C70039", "#900C3F", "#b66e8d",
+            "#61a4ba", "#6178ba", "#54a87f", "#25328a", "#b6856e",
+            "#ba6161", "#20714a", "#0073C2FF", "#EFC000FF", "#868686FF", 
+            "#CD534CFF","#7AA6DCFF", "#003C67FF", "#8F7700FF", "#3B3B3BFF",
+            "#A73030FF", "#4A6990FF")[1:length(unique(seuratE18EYFPv2.int$intCluster))]
+names(colPal) <- unique(seuratE18EYFPv2.int$intCluster)
+```
+
+### assign label
+```{r assign label int clusters v2 mLTo only}
+seuratE18EYFPv2.int$label <- "label"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "0")] <- "cluster2"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "1")] <- "cluster3"
+seuratE18EYFPv2.int$label[which(seuratE18EYFPv2.int$intCluster == "2")] <- "cluster1"
+
+table(seuratE18EYFPv2.int$label)
+##order
+seuratE18EYFPv2.int$label <- factor(seuratE18EYFPv2.int$label, levels = c("cluster2", "cluster3", "cluster1"))
+table(seuratE18EYFPv2.int$label)
+
+colLab <- c("#900C3F","#b66e8d", "#003C67FF")
+names(colLab) <- c("cluster2", "cluster3", "cluster1")
+```
+
+## dimplot int data v2
+### clustering 
+```{r}
+Idents(seuratE18EYFPv2.int) <- seuratE18EYFPv2.int$label
+DimPlot(seuratE18EYFPv2.int, reduction = "umap",
+        label = T, shuffle = T, cols = colLab) +
+  theme_bw() +
+  theme(axis.text = element_blank(), axis.ticks = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  xlab("umap1") +
+  ylab("umap2")
+```
+
+### convert to sce
+```{r}
+##convert seurat object to sce object
+DefaultAssay(object = seuratE18EYFPv2.int) <- "integrated"
+sce <- as.SingleCellExperiment(seuratE18EYFPv2.int)
+```
+
+## slingshot 
+```{r slingshot E18}
+sce <- slingshot(sce, clusterLabels = 'label', reducedDim = 'UMAP',
+                 start.clus="cluster1",
+                 dist.method="simple", extend = 'n', stretch=0)
+```
+
+```{r slingshot-1}
+clustDat <- data.frame(clustCol=colLab) %>% rownames_to_column(., "cluster")
+colDat <- data.frame(cluster=seuratE18EYFPv2.int$label)  %>% left_join(., clustDat, by="cluster") 
+```
+
+```{r slingshot-2}
+plot(reducedDims(sce)$UMAP, col = colDat$clustCol, pch=16, asp = 1)
+lines(SlingshotDataSet(sce), lwd=2, type = 'lineages', col = 'black')
+```
+
+
+```{r slingshot-3}
+plot(reducedDims(sce)$UMAP, col = colDat$clustCol, pch=16, asp = 1)
+lines(SlingshotDataSet(sce), lwd=2, col='black')
+```
+
+
+```{r}
+colors <- colorRampPalette(brewer.pal(11,'YlGnBu'))(100)
+plotcol <- colors[cut(slingAvgPseudotime(SlingshotDataSet(sce)), breaks=100)]
+
+plot(reducedDims(sce)$UMAP, col = plotcol, pch=16, asp = 1)
+lines(SlingshotDataSet(sce), lwd=2, col='black')
+```
+
+```{r}
+colors <- colorRampPalette(brewer.pal(11,'PuOr')[-6])(100)
+plotcol <- colors[cut(slingAvgPseudotime(SlingshotDataSet(sce)), breaks=100)]
+
+plot(reducedDims(sce)$UMAP, col = plotcol, pch=16, asp = 1)
+lines(SlingshotDataSet(sce), lwd=2, col='black')
+```
+
+## session info
+```{r date and session info}
+date()
+sessionInfo()
+```

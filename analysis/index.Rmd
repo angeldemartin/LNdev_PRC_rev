@@ -40,6 +40,10 @@ E18 EYFP
 Marker E18 EYFP
 [link](E18_mLN_iLN_EYFPonly_marker.html)
 
+### Trajectory E18 mLN and iLN EYFP positive cells only.
+Trajectory E18 EYFP
+[link](E18_mLN_iLN_EYFPonly_slingshot.html)
+
 ## iLN
 ### Trajectory analysis iLN all timepoints. 
 Trajectory
