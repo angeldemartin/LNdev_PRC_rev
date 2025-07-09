@@ -134,7 +134,7 @@ markerGenes <- FindAllMarkers(seuratE18EYFPv2.int, only.pos=T) %>%
 ```{r, include=FALSE, eval=FALSE}
 #save table
 write.table(markerGenes, 
-            file= "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/markerGenes_E18_EYFPpos_integrated_intCluster",
+            file= "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/markerGenes_E18_EYFPpos_integrated_intCluster.txt",
             sep="\t",
             quote=F,
             row.names=F,
@@ -146,8 +146,7 @@ write.table(markerGenes,
 seurat_markers <- data.frame(gene=c("Vcam1", "Icam1",
                                     "Cxcl13", "Ccl19", "Ccl21a","Tnfsf11", "Grem1","Ifitm1","Cxcl1","Ifitm3","Ccl2","Nfkbia","Des",
                                     "Mfap5","Cdkn1c","Akap12","Anxa2","Lox","Gsn","Basp1","Fndc1","Sparc","Col1a1","Fbn2","Nr4a1","Fbln1","Cd34","Pi16",
-                                    "Fbln5","Tm4sf1", "Ntrk3", "Fhl1", "Rgs7bp", "Adamts2", "Mpped2", "Ramp1", "Pdgfrl", "Eln", "Hspb2","Mgp", "Actg2","Acta2", "Myh11", "Mcam", 
-                                    "Adipoq", "Mki67", "Msln"))
+                                    "Fbln5","Tm4sf1", "Ntrk3", "Fhl1", "Rgs7bp", "Adamts2", "Mpped2", "Ramp1", "Pdgfrl", "Eln", "Hspb2","Mgp", "Actg2","Acta2", "Myh11","Mcam","Adipoq", "Mki67", "Msln"))
 
 genes <- data.frame(geneID=rownames(seuratE18EYFPv2.int)) %>%
   mutate(gene=gsub(".*\\.", "",  geneID)) 
@@ -193,8 +192,24 @@ DotPlot(seuratE18EYFPv2.int, assay="RNA", features = rev(markerAll$geneID), scal
 ### convert to sce 
 ```{r convert to sce}
 ##convert seurat object to sce object
-DefaultAssay(object = seuratE18EYFPv2.int) <- "integrated"
-sce <- as.SingleCellExperiment(seuratE18EYFPv2.int)
+##convert seurat object to sce object
+##exteract logcounts
+logcounts <- GetAssayData(seuratE18EYFPv2.int, assay = "RNA", slot = "data")
+counts <- GetAssayData(seuratE18EYFPv2.int, assay = "RNA", slot = "counts")
+##extract reduced dims from integrated assay
+pca <- Embeddings(seuratE18EYFPv2.int, reduction = "pca")
+umap <- Embeddings(seuratE18EYFPv2.int, reduction = "umap")
+##create sce object
+sce <- SingleCellExperiment(assays =list (
+  counts = counts,
+  logcounts = logcounts
+),
+colData = seuratE18EYFPv2.int@meta.data,
+rowData = data.frame(gene_id = rownames(logcounts)),
+reducedDims = SimpleList(
+  PCA = pca,
+  UMAP = umap
+))
 genes <- data.frame(geneID=rownames(sce)) %>% mutate(gene=gsub(".*\\.", "", geneID))
 pal = colorRampPalette(c("#053061", "#2166ac", "#f7f7f7", "#f4a582", "#b2183c", "#85122d"))
 ```
@@ -299,11 +314,12 @@ plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
 ```
 
-## subset mLTo and rerun
+## exclude Adipoc and Mesothelial and rerun
 ```{r}
 table(seuratE18EYFPv2.int$label)
 seuratE18EYFPv2.int <- subset(seuratE18EYFPv2.int, label %in% c("Adipoc", "Mesothelial"), invert = TRUE)
 table(seuratE18EYFPv2.int$label)
+table(seuratE18EYFPv2.int$orig.ident)
 
 ## rerun seurat
 DefaultAssay(object = seuratE18EYFPv2.int) <- "integrated"
@@ -392,6 +408,24 @@ DimPlot(seuratE18EYFPv2.int, reduction = "umap", group.by = "label", pt.size=0.5
   theme(legend.position = "none") 
 ```
 
+### featrue plot Ccl19 
+```{r feature Ccl19}
+genes <- data.frame(gene=rownames(seuratE18EYFPv2.int)) %>% 
+    mutate(geneID=gsub("^.*\\.", "", gene)) 
+
+selGenes <- data.frame(geneID=c("Ccl19")) %>% 
+  left_join(., genes, by = "geneID") 
+
+pList <- sapply(selGenes$gene, function(x){
+  p <- FeaturePlot(seuratE18EYFPv2.int, reduction = "umap", 
+            features = x, 
+            cols=c("lightgrey","darkred"),
+            order = FALSE)+
+  theme(legend.position="right")
+  plot(p)
+})
+```
+
 ## dotplot FRC marker int v2
 ```{r dotplot FRC marker v2 mLTo only, fig.height=10, fig.width=6}
 seurat_markers <- data.frame(gene=c("Vcam1", "Icam1",
@@ -439,18 +473,31 @@ DotPlot(seuratE18EYFPv2.int, assay="RNA", features = rev(markerAll$geneID), scal
   xlab("") + ylab("")
 ```
 
-## mLTo signatures
+## signatures
 ### convert to sce 
-```{r convert to sce mLTo only}
+```{r}
 ##convert seurat object to sce object
-DefaultAssay(object = seuratE18EYFPv2.int) <- "integrated"
-sce <- as.SingleCellExperiment(seuratE18EYFPv2.int)
-genes <- data.frame(geneID=rownames(sce)) %>% mutate(gene=gsub(".*\\.", "", geneID))
-pal = colorRampPalette(c("#053061", "#2166ac", "#f7f7f7", "#f4a582", "#b2183c", "#85122d"))
+##exteract logcounts
+logcounts <- GetAssayData(seuratE18EYFPv2.int, assay = "RNA", slot = "data")
+counts <- GetAssayData(seuratE18EYFPv2.int, assay = "RNA", slot = "counts")
+##extract reduced dims from integrated assay
+pca <- Embeddings(seuratE18EYFPv2.int, reduction = "pca")
+umap <- Embeddings(seuratE18EYFPv2.int, reduction = "umap")
+##create sce object
+sce <- SingleCellExperiment(assays =list (
+  counts = counts,
+  logcounts = logcounts
+),
+colData = seuratE18EYFPv2.int@meta.data,
+rowData = data.frame(gene_id = rownames(logcounts)),
+reducedDims = SimpleList(
+  PCA = pca,
+  UMAP = umap
+))
 ```
 
-### plot signature mLTo1/2
-```{r}
+### plot signature cluster2
+```{r signature cluster2}
 selGenes <- data.frame(gene=c("Cxcl13", "Ccl19", "Ccl21a","Tnfsf11", "Grem1"))
 signGenes <- genes %>% dplyr::filter(gene %in% selGenes$gene)
 
@@ -469,8 +516,8 @@ plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
 ```
 
-### plot signature mLTo3
-```{r}
+### plot signature cluster3 -1
+```{r signature cluster3 -1}
 selGenes <- data.frame(gene=c("Mfap5","Gsn","Fndc1","Col1a1","Cd34"))
 signGenes <- genes %>% dplyr::filter(gene %in% selGenes$gene)
 
@@ -489,8 +536,8 @@ plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
 ```
 
-### plot signature mLTo4
-```{r}
+### plot signature cluster3 -2
+```{r signature cluster3 -2}
 selGenes <- data.frame(gene=c("Fbln5","Eln","Actg2","Acta2","Myh11"))
 signGenes <- genes %>% dplyr::filter(gene %in% selGenes$gene)
 
@@ -509,8 +556,8 @@ plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
 ```
 
-### plot signature 3/4 combined
-```{r}
+### plot signature cluster3 all
+```{r signature cluster3 all}
 selGenes <- data.frame(gene=c("Fbln5","Eln","Actg2","Acta2","Myh11","Mfap5","Gsn","Fndc1","Col1a1","Cd34"))
 signGenes <- genes %>% dplyr::filter(gene %in% selGenes$gene)
 
@@ -529,8 +576,8 @@ plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
 ```
 
-### plot signature 3/4 combined 5selected
-```{r}
+### plot signature 3 all (5selected)
+```{r signature 3 all (5selected)}
 selGenes <- data.frame(gene=c("Eln","Mfap5","Gsn","Fndc1","Cd34"))
 signGenes <- genes %>% dplyr::filter(gene %in% selGenes$gene)
 
@@ -560,8 +607,8 @@ cntMat <- rowSums(t(as.matrix(
     sceSub@assays@data$logcounts)))/nrow(signGenes)
 sceSub$sign <- cntMat
 sceSub$sign2 <- sceSub$sign
-sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 1.5))
-sceSub$sign2[which(sceSub$sign > 1.5)] <- 1.5
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 1))
+sceSub$sign2[which(sceSub$sign > 1)] <- 1
 ##check max and min values
 max(sceSub$sign)
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
@@ -580,8 +627,8 @@ cntMat <- rowSums(t(as.matrix(
     sceSub@assays@data$logcounts)))/nrow(signGenes)
 sceSub$sign <- cntMat
 sceSub$sign2 <- sceSub$sign
-sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 1.5))
-sceSub$sign2[which(sceSub$sign > 1.5)] <- 1.5
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 0.7))
+sceSub$sign2[which(sceSub$sign > 0.7)] <- 0.7
 ##check max and min values
 max(sceSub$sign)
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
@@ -590,7 +637,7 @@ plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
 ```
 
 ### plot proliferation signature
-```{r}
+```{r proiferation signature}
 selGenes <- data.frame(gene=c("Mki67", "Ccna2", "Cdca8", "Prc1", "Aurkb"))
 signGenes <- genes %>% dplyr::filter(gene %in% selGenes$gene)
 
@@ -606,6 +653,290 @@ sceSub$sign2[which(sceSub$sign > 2)] <- 2
 max(sceSub$sign)
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc +
   theme(legend.position = "none")
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+## GSEA 
+### calculate marker genes 
+```{r, eval=FALSE, include=FALSE, include=TRUE, eval=FALSE}
+## calculate marker genes
+DefaultAssay(object = seuratE18EYFPv2.int) <- "RNA"
+Idents(seuratE18EYFPv2.int) <- seuratE18EYFPv2.int$label
+levels(seuratE18EYFPv2.int)
+
+markerGenes <- FindAllMarkers(seuratE18EYFPv2.int, only.pos=T) %>% 
+  dplyr::filter(p_val_adj < 0.01) 
+```
+
+```{r, include=FALSE, eval=FALSE}
+#save table
+write.table(markerGenes, 
+            file= "/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/markerGenes_E18_EYFPpos_integrated_fil_label.txt",
+            sep="\t",
+            quote=F,
+            row.names=F,
+            col.names=T)
+```
+
+### run GSEA on cluster2
+```{r GSEA cluster2, fig.height=12, fig.width=12}
+## load DEGenesFbcond3
+markerGenes <- read.delim("/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/markerGenes_E18_EYFPpos_integrated_fil_label.txt", header = TRUE, sep = "\t")
+## GSEA on genes upregulated in granulomaFb
+##adjust table
+markerProlif <- dplyr::filter(markerGenes, cluster == "cluster2")
+markerProlif <- markerProlif%>%
+  mutate(Gene=gsub("^.*\\.", "", gene))  %>%
+  mutate(EnsID=gsub("\\..*","", gene))
+
+##GSEA Gran
+ego <- enrichGO(gene = unique(markerProlif$EnsID),
+                          OrgDb = org.Mm.eg.db,
+                          keyType = 'ENSEMBL',
+                          ont = "BP",
+                          pAdjustMethod = "BH",
+                          pvalueCutoff = 0.05,
+                          qvalueCutoff = 0.05)
+ego <- setReadable(ego, OrgDb = org.Mm.eg.db)
+dotplot(ego, showCategory=30)
+```
+
+### run GSEA on cluster3
+```{r GSEA cluster3, fig.height=12, fig.width=12}
+## GSEA on genes upregulated in granulomaFb
+##adjust table
+markerProlif <- dplyr::filter(markerGenes, cluster == "cluster3")
+markerProlif <- markerProlif%>%
+  mutate(Gene=gsub("^.*\\.", "", gene))  %>%
+  mutate(EnsID=gsub("\\..*","", gene))
+
+##GSEA Gran
+ego <- enrichGO(gene = unique(markerProlif$EnsID),
+                          OrgDb = org.Mm.eg.db,
+                          keyType = 'ENSEMBL',
+                          ont = "BP",
+                          pAdjustMethod = "BH",
+                          pvalueCutoff = 0.05,
+                          qvalueCutoff = 0.05)
+ego <- setReadable(ego, OrgDb = org.Mm.eg.db)
+dotplot(ego, showCategory=30)
+```
+
+### run GSEA on cluster1
+```{r GSEA cluster1, fig.height=12, fig.width=12}
+## GSEA on genes upregulated in granulomaFb
+##adjust table
+markerProlif <- dplyr::filter(markerGenes, cluster == "cluster1")
+markerProlif <- markerProlif%>%
+  mutate(Gene=gsub("^.*\\.", "", gene))  %>%
+  mutate(EnsID=gsub("\\..*","", gene))
+
+##GSEA Gran
+ego <- enrichGO(gene = unique(markerProlif$EnsID),
+                          OrgDb = org.Mm.eg.db,
+                          keyType = 'ENSEMBL',
+                          ont = "BP",
+                          pAdjustMethod = "BH",
+                          pvalueCutoff = 0.05,
+                          qvalueCutoff = 0.05)
+ego <- setReadable(ego, OrgDb = org.Mm.eg.db)
+dotplot(ego, showCategory=30)
+```
+
+## project signatures
+### stem cell population maintenance
+```{r stem cell population maintenance}
+ego1 <- dplyr::filter(ego@result,ego@result$Description=="stem cell population maintenance")
+g1 <- ego1$geneID
+Str <-(g1)
+StrSub <- strsplit(Str, "/")
+df <- as.data.frame(StrSub)
+colnames(df) <- c("gene")
+
+##make a count matrix of signature genes
+signGenes <- genes %>% dplyr::filter(gene %in% df$gene)
+
+sceSub <- sce[which(rownames(sce) %in% signGenes$geneID),]
+cntMat <- rowSums(t(as.matrix(
+    sceSub@assays@data$logcounts)))/nrow(signGenes)
+sceSub$sign <- cntMat
+sceSub$sign2 <- sceSub$sign
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 0.6))
+sceSub$sign2[which(sceSub$sign > 0.6)] <- 0.6
+sceSub$sign2[which(sceSub$sign < 0)] <- 0
+##check max and min values
+max(sceSub$sign)
+min(sceSub$sign)
+plotUMAP(sceSub, colour_by = "sign2") + sc +
+  theme(legend.position = "none", point_size = 1)
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+### positive regulation of stem cell population maintenance
+```{r positive regulation of stem cell population maintenance}
+ego1 <- dplyr::filter(ego@result,ego@result$Description=="positive regulation of stem cell population maintenance")
+g1 <- ego1$geneID
+Str <-(g1)
+StrSub <- strsplit(Str, "/")
+df <- as.data.frame(StrSub)
+colnames(df) <- c("gene")
+
+##make a count matrix of signature genes
+signGenes <- genes %>% dplyr::filter(gene %in% df$gene)
+
+sceSub <- sce[which(rownames(sce) %in% signGenes$geneID),]
+cntMat <- rowSums(t(as.matrix(
+    sceSub@assays@data$logcounts)))/nrow(signGenes)
+sceSub$sign <- cntMat
+sceSub$sign2 <- sceSub$sign
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 0.8))
+sceSub$sign2[which(sceSub$sign > 0.8)] <- 0.8
+sceSub$sign2[which(sceSub$sign < 0)] <- 0
+##check max and min values
+max(sceSub$sign)
+min(sceSub$sign)
+plotUMAP(sceSub, colour_by = "sign2") + sc +
+  theme(legend.position = "none", point_size = 1)
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+### negative regulation of stem cell population maintenance
+```{r negative regulation of stem cell population maintenance}
+ego1 <- dplyr::filter(ego@result,ego@result$Description=="negative regulation of stem cell population maintenance")
+g1 <- ego1$geneID
+Str <-(g1)
+StrSub <- strsplit(Str, "/")
+df <- as.data.frame(StrSub)
+colnames(df) <- c("gene")
+
+##make a count matrix of signature genes
+signGenes <- genes %>% dplyr::filter(gene %in% df$gene)
+
+sceSub <- sce[which(rownames(sce) %in% signGenes$geneID),]
+cntMat <- rowSums(t(as.matrix(
+    sceSub@assays@data$logcounts)))/nrow(signGenes)
+sceSub$sign <- cntMat
+sceSub$sign2 <- sceSub$sign
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 1))
+sceSub$sign2[which(sceSub$sign > 1)] <- 1
+sceSub$sign2[which(sceSub$sign < 0)] <- 0
+##check max and min values
+max(sceSub$sign)
+min(sceSub$sign)
+plotUMAP(sceSub, colour_by = "sign2") + sc +
+  theme(legend.position = "none", point_size = 1)
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+### neuronal stem cell population maintenance
+```{r neuronal stem cell population maintenance}
+ego1 <- dplyr::filter(ego@result,ego@result$Description=="neuronal stem cell population maintenance")
+g1 <- ego1$geneID
+Str <-(g1)
+StrSub <- strsplit(Str, "/")
+df <- as.data.frame(StrSub)
+colnames(df) <- c("gene")
+
+##make a count matrix of signature genes
+signGenes <- genes %>% dplyr::filter(gene %in% df$gene)
+
+sceSub <- sce[which(rownames(sce) %in% signGenes$geneID),]
+cntMat <- rowSums(t(as.matrix(
+    sceSub@assays@data$logcounts)))/nrow(signGenes)
+sceSub$sign <- cntMat
+sceSub$sign2 <- sceSub$sign
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 0.8))
+sceSub$sign2[which(sceSub$sign > 0.8)] <- 0.8
+sceSub$sign2[which(sceSub$sign < 0)] <- 0
+##check max and min values
+max(sceSub$sign)
+min(sceSub$sign)
+plotUMAP(sceSub, colour_by = "sign2") + sc +
+  theme(legend.position = "none", point_size = 1)
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+### stem cell proliferation
+```{r stem cell proliferation}
+ego1 <- dplyr::filter(ego@result,ego@result$Description=="stem cell proliferation")
+g1 <- ego1$geneID
+Str <-(g1)
+StrSub <- strsplit(Str, "/")
+df <- as.data.frame(StrSub)
+colnames(df) <- c("gene")
+
+##make a count matrix of signature genes
+signGenes <- genes %>% dplyr::filter(gene %in% df$gene)
+
+sceSub <- sce[which(rownames(sce) %in% signGenes$geneID),]
+cntMat <- rowSums(t(as.matrix(
+    sceSub@assays@data$logcounts)))/nrow(signGenes)
+sceSub$sign <- cntMat
+sceSub$sign2 <- sceSub$sign
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 0.8))
+sceSub$sign2[which(sceSub$sign > 0.8)] <- 0.8
+sceSub$sign2[which(sceSub$sign < 0)] <- 0
+##check max and min values
+max(sceSub$sign)
+min(sceSub$sign)
+plotUMAP(sceSub, colour_by = "sign2") + sc +
+  theme(legend.position = "none", point_size = 1)
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+### stem cell differentiation
+```{r stem cell differentiation}
+ego1 <- dplyr::filter(ego@result,ego@result$Description=="stem cell differentiation")
+g1 <- ego1$geneID
+Str <-(g1)
+StrSub <- strsplit(Str, "/")
+df <- as.data.frame(StrSub)
+colnames(df) <- c("gene")
+
+##make a count matrix of signature genes
+signGenes <- genes %>% dplyr::filter(gene %in% df$gene)
+
+sceSub <- sce[which(rownames(sce) %in% signGenes$geneID),]
+cntMat <- rowSums(t(as.matrix(
+    sceSub@assays@data$logcounts)))/nrow(signGenes)
+sceSub$sign <- cntMat
+sceSub$sign2 <- sceSub$sign
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 0.7))
+sceSub$sign2[which(sceSub$sign > 0.7)] <- 0.7
+sceSub$sign2[which(sceSub$sign < 0)] <- 0
+##check max and min values
+max(sceSub$sign)
+min(sceSub$sign)
+plotUMAP(sceSub, colour_by = "sign2") + sc +
+  theme(legend.position = "none", point_size = 1)
+plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+### stem cell division
+```{r stem cell division}
+ego1 <- dplyr::filter(ego@result,ego@result$Description=="stem cell division")
+g1 <- ego1$geneID
+Str <-(g1)
+StrSub <- strsplit(Str, "/")
+df <- as.data.frame(StrSub)
+colnames(df) <- c("gene")
+
+##make a count matrix of signature genes
+signGenes <- genes %>% dplyr::filter(gene %in% df$gene)
+
+sceSub <- sce[which(rownames(sce) %in% signGenes$geneID),]
+cntMat <- rowSums(t(as.matrix(
+    sceSub@assays@data$logcounts)))/nrow(signGenes)
+sceSub$sign <- cntMat
+sceSub$sign2 <- sceSub$sign
+sc <- scale_colour_gradientn(colours = pal(100), limits=c(0, 0.8))
+sceSub$sign2[which(sceSub$sign > 0.8)] <- 0.8
+sceSub$sign2[which(sceSub$sign < 0)] <- 0
+##check max and min values
+max(sceSub$sign)
+min(sceSub$sign)
+plotUMAP(sceSub, colour_by = "sign2") + sc +
+  theme(legend.position = "none", point_size = 1)
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
 ```
 
