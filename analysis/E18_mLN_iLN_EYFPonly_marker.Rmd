@@ -494,6 +494,9 @@ reducedDims = SimpleList(
   PCA = pca,
   UMAP = umap
 ))
+
+genes <- data.frame(geneID=rownames(sce)) %>% mutate(gene=gsub(".*\\.", "", geneID))
+pal = colorRampPalette(c("#053061", "#2166ac", "#f7f7f7", "#f4a582", "#b2183c", "#85122d"))
 ```
 
 ### plot signature cluster2
@@ -682,14 +685,14 @@ write.table(markerGenes,
 ```{r GSEA cluster2, fig.height=12, fig.width=12}
 ## load DEGenesFbcond3
 markerGenes <- read.delim("/Users/immbio/Desktop/Project/Angelina/LNdev_PRC_rev/data/markerGenes_E18_EYFPpos_integrated_fil_label.txt", header = TRUE, sep = "\t")
-## GSEA on genes upregulated in granulomaFb
+## GSEA 
 ##adjust table
 markerProlif <- dplyr::filter(markerGenes, cluster == "cluster2")
 markerProlif <- markerProlif%>%
   mutate(Gene=gsub("^.*\\.", "", gene))  %>%
   mutate(EnsID=gsub("\\..*","", gene))
 
-##GSEA Gran
+##GSEA 
 ego <- enrichGO(gene = unique(markerProlif$EnsID),
                           OrgDb = org.Mm.eg.db,
                           keyType = 'ENSEMBL',
@@ -772,6 +775,90 @@ plotUMAP(sceSub, colour_by = "sign2") + sc +
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
 ```
 
+### make heatmap of gnees in signatures
+### heatmap funcion
+```{r heatmap funcion}
+avgHeatmap <- function(seurat, selGenes, colVecIdent, colVecCond=NULL,
+                       ordVec=NULL, gapVecR=NULL, gapVecC=NULL,cc=FALSE,
+                       cr=FALSE, condCol=FALSE){
+  
+  selGenes <- selGenes$gene
+  
+  ## assay data
+  clusterAssigned <- as.data.frame(Idents(seurat)) %>%
+  dplyr::mutate(cell=rownames(.))
+  colnames(clusterAssigned)[1] <- "ident"
+  seuratDat <- GetAssayData(seurat)
+  
+  ## genes of interest
+  genes <- data.frame(gene=rownames(seurat)) %>% 
+    mutate(geneID=gsub("^.*\\.", "", gene)) %>% filter(geneID %in% selGenes)
+
+  ## matrix with averaged cnts per ident
+  logNormExpres <- as.data.frame(t(as.matrix(
+    seuratDat[which(rownames(seuratDat) %in% genes$gene),])))
+  logNormExpres <- logNormExpres %>% dplyr::mutate(cell=rownames(.)) %>%
+    dplyr::left_join(.,clusterAssigned, by=c("cell")) %>%
+    dplyr::select(-cell) %>% dplyr::group_by(ident) %>%
+    dplyr::summarise_all(mean)
+  logNormExpresMa <- logNormExpres %>% dplyr::select(-ident) %>% as.matrix()
+  rownames(logNormExpresMa) <- logNormExpres$ident
+  logNormExpresMa <- t(logNormExpresMa)
+  rownames(logNormExpresMa) <- gsub("^.*?\\.","",rownames(logNormExpresMa))
+  
+  ## remove genes if they are all the same in all groups
+  ind <- apply(logNormExpresMa, 1, sd) == 0
+  logNormExpresMa <- logNormExpresMa[!ind,]
+  genes <- genes[!ind,]
+
+  ## color columns according to cluster
+  annotation_col <- as.data.frame(gsub("(^.*?_)","",
+                                       colnames(logNormExpresMa)))%>%
+    dplyr::mutate(celltype=gsub("(_.*$)","",colnames(logNormExpresMa)))
+  colnames(annotation_col)[1] <- "col1"
+  annotation_col <- annotation_col %>%
+    dplyr::mutate(cond = gsub(".*_","",col1)) %>%
+    dplyr::select(cond, celltype)
+  rownames(annotation_col) <- colnames(logNormExpresMa) 
+
+  ann_colors = list(
+      cond = colVecCond,
+      celltype=colVecIdent)
+  if(is.null(ann_colors$cond)){
+    annotation_col$cond <- NULL
+  }
+  
+  ## adjust order
+  logNormExpresMa <- logNormExpresMa[selGenes,]
+  if(is.null(ordVec)){
+    ordVec <- levels(seurat)
+  }
+  logNormExpresMa <- logNormExpresMa[,ordVec]
+
+  ## scaled row-wise
+  pheatmap(logNormExpresMa, scale="row" ,treeheight_row = 0, cluster_rows = cr, 
+         cluster_cols = cc,
+         color = colorRampPalette(c("#2166AC", "#F7F7F7", "#B2182B"))(50),
+         annotation_col = annotation_col, cellwidth=15, cellheight=10,
+         annotation_colors = ann_colors, gaps_row = gapVecR, gaps_col = gapVecC)
+}
+```
+
+### heatmap
+```{r heatmap stem cell population maintenance, fig.height=8, fig.width=4}
+sig <- markerGenes %>% mutate(geneID = gene) %>% dplyr::filter(cluster == "cluster1") %>%
+  mutate(gene=gsub(".*\\.", "",  geneID)) %>% dplyr::filter(gene %in% df$gene)
+
+grpCnt <- sig %>% group_by(cluster) %>% summarise(cnt=n())
+ordVec <- levels(seuratE18EYFPv2.int)
+
+pOut <- avgHeatmap(seurat = seuratE18EYFPv2.int, selGenes = sig,
+                  colVecIdent = colLab, 
+                  ordVec=ordVec,
+                  gapVecR=NULL, gapVecC=NULL,cc=T,
+                  cr=F, condCol=F)
+```
+
 ### positive regulation of stem cell population maintenance
 ```{r positive regulation of stem cell population maintenance}
 ego1 <- dplyr::filter(ego@result,ego@result$Description=="positive regulation of stem cell population maintenance")
@@ -798,6 +885,21 @@ min(sceSub$sign)
 plotUMAP(sceSub, colour_by = "sign2") + sc +
   theme(legend.position = "none", point_size = 1)
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+### heatmap
+```{r heatmap positive regulation of stem cell population maintenance, fig.height=4, fig.width=4}
+sig <- markerGenes %>% mutate(geneID = gene) %>% dplyr::filter(cluster == "cluster1") %>%
+  mutate(gene=gsub(".*\\.", "",  geneID)) %>% dplyr::filter(gene %in% df$gene)
+
+grpCnt <- sig %>% group_by(cluster) %>% summarise(cnt=n())
+ordVec <- levels(seuratE18EYFPv2.int)
+
+pOut <- avgHeatmap(seurat = seuratE18EYFPv2.int, selGenes = sig,
+                  colVecIdent = colLab, 
+                  ordVec=ordVec,
+                  gapVecR=NULL, gapVecC=NULL,cc=T,
+                  cr=F, condCol=F)
 ```
 
 ### negative regulation of stem cell population maintenance
@@ -828,6 +930,21 @@ plotUMAP(sceSub, colour_by = "sign2") + sc +
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
 ```
 
+### heatmap
+```{r heatmap negative regulation of stem cell population maintenance, fig.height=4, fig.width=4}
+sig <- markerGenes %>% mutate(geneID = gene) %>% dplyr::filter(cluster == "cluster1") %>%
+  mutate(gene=gsub(".*\\.", "",  geneID)) %>% dplyr::filter(gene %in% df$gene)
+
+grpCnt <- sig %>% group_by(cluster) %>% summarise(cnt=n())
+ordVec <- levels(seuratE18EYFPv2.int)
+
+pOut <- avgHeatmap(seurat = seuratE18EYFPv2.int, selGenes = sig,
+                  colVecIdent = colLab, 
+                  ordVec=ordVec,
+                  gapVecR=NULL, gapVecC=NULL,cc=T,
+                  cr=F, condCol=F)
+```
+
 ### neuronal stem cell population maintenance
 ```{r neuronal stem cell population maintenance}
 ego1 <- dplyr::filter(ego@result,ego@result$Description=="neuronal stem cell population maintenance")
@@ -854,6 +971,21 @@ min(sceSub$sign)
 plotUMAP(sceSub, colour_by = "sign2") + sc +
   theme(legend.position = "none", point_size = 1)
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+### heatmap
+```{r heatmap neuronal stem cell population maintenance, fig.height=4, fig.width=4}
+sig <- markerGenes %>% mutate(geneID = gene) %>% dplyr::filter(cluster == "cluster1") %>%
+  mutate(gene=gsub(".*\\.", "",  geneID)) %>% dplyr::filter(gene %in% df$gene)
+
+grpCnt <- sig %>% group_by(cluster) %>% summarise(cnt=n())
+ordVec <- levels(seuratE18EYFPv2.int)
+
+pOut <- avgHeatmap(seurat = seuratE18EYFPv2.int, selGenes = sig,
+                  colVecIdent = colLab, 
+                  ordVec=ordVec,
+                  gapVecR=NULL, gapVecC=NULL,cc=T,
+                  cr=F, condCol=F)
 ```
 
 ### stem cell proliferation
@@ -884,6 +1016,21 @@ plotUMAP(sceSub, colour_by = "sign2") + sc +
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
 ```
 
+### heatmap
+```{r heatmap stem cell proliferation, fig.height=6, fig.width=4}
+sig <- markerGenes %>% mutate(geneID = gene) %>% dplyr::filter(cluster == "cluster1") %>%
+  mutate(gene=gsub(".*\\.", "",  geneID)) %>% dplyr::filter(gene %in% df$gene)
+
+grpCnt <- sig %>% group_by(cluster) %>% summarise(cnt=n())
+ordVec <- levels(seuratE18EYFPv2.int)
+
+pOut <- avgHeatmap(seurat = seuratE18EYFPv2.int, selGenes = sig,
+                  colVecIdent = colLab, 
+                  ordVec=ordVec,
+                  gapVecR=NULL, gapVecC=NULL,cc=T,
+                  cr=F, condCol=F)
+```
+
 ### stem cell differentiation
 ```{r stem cell differentiation}
 ego1 <- dplyr::filter(ego@result,ego@result$Description=="stem cell differentiation")
@@ -912,6 +1059,21 @@ plotUMAP(sceSub, colour_by = "sign2") + sc +
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
 ```
 
+### heatmap
+```{r heatmap stem cell differentiation, fig.height=6, fig.width=4}
+sig <- markerGenes %>% mutate(geneID = gene) %>% dplyr::filter(cluster == "cluster1") %>%
+  mutate(gene=gsub(".*\\.", "",  geneID)) %>% dplyr::filter(gene %in% df$gene)
+
+grpCnt <- sig %>% group_by(cluster) %>% summarise(cnt=n())
+ordVec <- levels(seuratE18EYFPv2.int)
+
+pOut <- avgHeatmap(seurat = seuratE18EYFPv2.int, selGenes = sig,
+                  colVecIdent = colLab, 
+                  ordVec=ordVec,
+                  gapVecR=NULL, gapVecC=NULL,cc=T,
+                  cr=F, condCol=F)
+```
+
 ### stem cell division
 ```{r stem cell division}
 ego1 <- dplyr::filter(ego@result,ego@result$Description=="stem cell division")
@@ -938,6 +1100,21 @@ min(sceSub$sign)
 plotUMAP(sceSub, colour_by = "sign2") + sc +
   theme(legend.position = "none", point_size = 1)
 plotUMAP(sceSub, colour_by = "sign2", point_size = 1) + sc
+```
+
+### heatmap
+```{r heatmap stem cell division, fig.height=4, fig.width=4}
+sig <- markerGenes %>% mutate(geneID = gene) %>% dplyr::filter(cluster == "cluster1") %>%
+  mutate(gene=gsub(".*\\.", "",  geneID)) %>% dplyr::filter(gene %in% df$gene)
+
+grpCnt <- sig %>% group_by(cluster) %>% summarise(cnt=n())
+ordVec <- levels(seuratE18EYFPv2.int)
+
+pOut <- avgHeatmap(seurat = seuratE18EYFPv2.int, selGenes = sig,
+                  colVecIdent = colLab, 
+                  ordVec=ordVec,
+                  gapVecR=NULL, gapVecC=NULL,cc=T,
+                  cr=F, condCol=F)
 ```
 
 ## session info
